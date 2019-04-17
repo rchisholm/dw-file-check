@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"*"
+		"workspaceContains:*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -57,6 +57,7 @@
 		"vscode": "^1.1.28"
 	},
 	"dependencies": {
+		"event-stream": "^4.0.1",
 		"fs": "0.0.1-security",
 		"username": "^4.1.0"
 	}

@@ -3,13 +3,15 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as username from 'username';
+import { callbackify } from 'util';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
 	// This code will only be executed once when your extension is activated
-	//console.log("DW file check activated.");
+	console.log("DW file check activated.");
+	vscode.window.showInformationMessage("DW file check activated.");
 
 	let deployExtension = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
 	if(!deployExtension) {
@@ -42,21 +44,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 			/*
 			getUserName().then(name => {
-				vscode.window.showInformationMessage(name);
+				vscode.window.showInformationMessage(name.toLowerCase());
 			});
 			*/
 
 			if(currentFileStatus === "out") {
 				let currentFileOwner = getFileOwner(context, currentFilePath);
 				getUserName().then(name => {
-					if(currentFileOwner === name){
+					if(currentFileOwner === name.toLowerCase()){
 						// file is checked out by you.
 						// vscode.window.showInformationMessage("file is checked out by you!");
 						finishCheckIn(context, currentFilePath);
 					}else{
 						// file is checked out by someone else
-						// vscode.window.showInformationMessage("file is checked out by " + currentFileOwner + "!");
-						//prompt...
 						vscode.window.showWarningMessage("file is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
 							if(choice === "Confirm"){
 								finishCheckIn(context, currentFilePath);
@@ -66,11 +66,11 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 			}else if(currentFileStatus === "locked"){
 				//file is locked
-				vscode.window.showInformationMessage("file is locked...");
+				vscode.window.showWarningMessage("File is locked. Already checked in.");
 				//do nothing
 			}else if(currentFileStatus === "unlocked"){
 				//file is unlocked
-				vscode.window.showInformationMessage("file is unlocked.");
+				//vscode.window.showInformationMessage("file is unlocked.");
 				finishCheckIn(context, currentFilePath);
 
 			}
@@ -88,6 +88,44 @@ export function activate(context: vscode.ExtensionContext) {
 		//   - on confirm: finish checkout
 		// if locked, remove readonly, finish Checkout
 		// if unlocked, finishCheckout
+
+		if(vscode.window.activeTextEditor){
+			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+			//vscode.window.showInformationMessage(currentFilePath);
+			let currentFileStatus = getFileStatus(context, currentFilePath);
+
+			/*
+			getUserName().then(name => {
+				vscode.window.showInformationMessage(name.toLowerCase());
+			});
+			*/
+
+			if(currentFileStatus === "out") {
+				let currentFileOwner = getFileOwner(context, currentFilePath);
+				getUserName().then(name => {
+					if(currentFileOwner === name.toLowerCase()){
+						// file is checked out by you.
+						vscode.window.showInformationMessage("file is already checked out by you.");
+					}else{
+						// file is checked out by someone else
+						vscode.window.showWarningMessage("file is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
+							if(choice === "Confirm"){
+								finishCheckOut(context, currentFilePath);
+							}
+						});
+					}
+				});
+			}else if(currentFileStatus === "locked"){
+				//file is locked
+				finishCheckOut(context, currentFilePath);
+			}else if(currentFileStatus === "unlocked"){
+				//file is unlocked
+				finishCheckOut(context, currentFilePath);
+
+			}
+		} else {
+			vscode.window.showInformationMessage("No open file.");
+		}
 
 	});
 
@@ -129,41 +167,41 @@ function onStart(context: vscode.ExtensionContext) {
 	//   if readonly: mark as locked.
 	//   else: mark as unlocked.
 
-	let files = vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms}/**")
+	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms}/**")
 		.then((uris) => {
 			uris.forEach((uri) => {
-				if(isReadOnly(uri.path)){
-					context.workspaceState.update("status:" + uri.path, "locked");
-					//console.log(uri.path + " is locked.");
+				if(isReadOnly(uri.fsPath)){
+					context.workspaceState.update("status:" + uri.fsPath, "locked");
+					//console.log(uri.fsPath + " is locked.");
 				} else {
-					context.workspaceState.update("status:" + uri.path, "unlocked");
-					//console.log(uri.path + " is unlocked.");
+					context.workspaceState.update("status:" + uri.fsPath, "unlocked");
+					//console.log(uri.fsPath + " is unlocked.");
+				}
+			});
+			vscode.workspace.findFiles("**/*.LCK", "**/{node_modules,tns_modules,platforms}/**")
+			.then((uris) => {
+				if(uris.length > 0) {
+					uris.forEach((uri) => {
+						let file = vscode.workspace.openTextDocument(uri);
+						file.then((file) =>{
+							let ownerName = file.getText().split("||")[0];
+							let filePath = uri.fsPath.split(".LCK")[0];
+							//console.log(filePath);
+							if(ownerName.length > 0){
+								//console.log(ownerName + " owns file " + filePath);
+								context.workspaceState.update("status:" + filePath, "out");
+								context.workspaceState.update("owner:" + filePath, ownerName);
+							}else{
+								//console.log("no owner for file " + filePath);
+								context.workspaceState.update("owner:" + filePath, ownerName);
+							}
+						});
+					});
+					console.log("Status of all files checked.");
 				}
 			});
 		});
 
-	let lockFiles = vscode.workspace.findFiles("**/*.LCK", "**/{node_modules,tns_modules, platforms}/**")
-		.then((uris) => {
-			if(uris.length > 0) {
-				uris.forEach((uri) => {
-					let file = vscode.workspace.openTextDocument(uri);
-					file.then((file) =>{
-						let ownerName = file.getText().split("||")[0];
-						let filePath = uri.path.split(".LCK")[0];
-						console.log(filePath);
-						if(ownerName.length > 0){
-							console.log(ownerName);
-							context.workspaceState.update("status:" + filePath, "out");
-							context.workspaceState.update("owner:" + filePath, ownerName);
-						}else{
-							console.log("(no owner)");
-							context.workspaceState.update("owner:" + filePath, ownerName);
-						}
-					});
-				});
-			}
-		});
-	
 
 	// CSS to display some markup before row in explorer file tree:
 	// .monaco-list-row .monaco-tl-row::before {
@@ -204,19 +242,45 @@ function isReadOnly(path: string){
 }
 
 //not sure if this works
+/*
 function setReadOnly(path: string){
 	if(!isReadOnly(path)){
 		fs.statSync(path).mode = fs.statSync(path).mode & 146;
 	}
 }
+*/
 
-//not sure if this works
+
+function setReadOnly(path:string){
+	function transform(path: fs.PathLike, cb: (arg0: null, arg1: fs.PathLike) => void){
+	  if((fs.statSync(path).mode & 146) !== 0){
+		fs.statSync(path).mode = fs.statSync(path).mode & 146;
+	  }
+	  cb(null, path);
+	}
+return require('event-stream').map(transform);
+}
+
+//doesn't work
+/*
 function removeReadOnly(path: string){
 	if(isReadOnly(path)){
 		fs.statSync(path).mode = fs.statSync(path).mode | 146;
 	}
 }
+*/
 
+function removeReadOnly(path:string){
+	function transform(path: fs.PathLike, cb: (arg0: null, arg1: fs.PathLike) => void){
+	  if((fs.statSync(path).mode & 146) === 0){
+		fs.statSync(path).mode = fs.statSync(path).mode | 146;
+	  }
+	  cb(null, path);
+	}
+return require('event-stream').map(transform);
+}
+
+//probably doesn't work
 function pullCurrentFile(){
 	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
 	// is the ext loaded and ready?
@@ -227,14 +291,37 @@ function pullCurrentFile(){
 					console.log( "Deploy activated");
 					// comment next line out for release
 					// findCommand(); 
-					vscode.commands.executeCommand("deploy.reloaded.pullFile");
+					vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
 				},
 				function(){
 					console.log( "Deploy activation failed");
 				}
 			);   
 		} else {
-			vscode.commands.executeCommand("deploy.reloaded.pullFile");
+			vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
+		}
+	}
+}
+
+//i hope this works
+function pushCurrentFile(){
+	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
+	// is the ext loaded and ready?
+	if(deploy){
+		if( deploy.isActive === false ){
+			deploy.activate().then(
+				function(){
+					console.log( "Deploy activated");
+					// comment next line out for release
+					// findCommand(); 
+					vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
+				},
+				function(){
+					console.log( "Deploy activation failed");
+				}
+			);   
+		} else {
+			vscode.commands.executeCommand("extension.deploy.reloaded.deployFile");
 		}
 	}
 }
@@ -246,22 +333,47 @@ function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	// add readonly to local
 	// mark as locked
 	// push to remote
+
+	//remove local .LCK file 
+	let lockFilePath = path + ".LCK";
+	fs.unlink(lockFilePath, function (err) {
+		if (err) { throw err; }
+		//console.log('.LCK file deleted!');
+	});
+
+	//need to remove remote .LCK file
+
+	//remove readonly from local
+	setReadOnly(path);
+
+	//set file status
+	setFileStatus(context, path, "locked");
+	setFileOwner(context, path, "");
+
+	//push to remove
+	pushCurrentFile();
 	
 	vscode.window.showInformationMessage("File checked in.");
 	return null;
 }
 
 function finishCheckOut(context: vscode.ExtensionContext, path: string){
+
 	// add local+remote .LCK file
 	// remove readonly from local
 	// mark file as checked out
 	// pull from remote
 
+	//create local .LCK file 
 	let lockFilePath = path + ".LCK";
-	fs.writeFile(lockFilePath, getUserName() + "||" + getUserEmail(), function (err) {
-		if (err) { throw err; }
-		console.log('Saved!');
+	getUserName().then(name => {
+		fs.writeFile(lockFilePath, name.toLowerCase() + "||" + name.toLowerCase() + "@marian.org", function (err) {
+			if (err) { throw err; }
+			//console.log('.LCK file saved!');
+		});
 	});
+
+	//need to push the .LCK file
 
 	//remove readonly from local
 	removeReadOnly(path);
@@ -269,7 +381,7 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 	//set status and owner
 	setFileStatus(context, path, "out");
 	getUserName().then(name => {
-		setFileOwner(context, path, name);
+		setFileOwner(context, path, name.toLowerCase());
 	});
 
 	//pull current file
