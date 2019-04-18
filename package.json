@@ -24,20 +24,16 @@
 				"title": "Check Out File"
 			},
 			{
-				"command": "extension.onSaveFile",
-				"title": "Save File"
-			},
-			{
-				"command": "extension.onOpenFile",
-				"title": "Open File"
-			},
-			{
-				"command": "extension.onPushFile",
+				"command": "extension.dwPushFile",
 				"title": "Push File"
 			},
 			{
-				"command": "extension.onPullFile",
+				"command": "extension.dwPullFile",
 				"title": "Pull File"
+			},
+			{
+				"command": "extension.dwSaveFile",
+				"title": "Save File"
 			}
 		]
 	},
