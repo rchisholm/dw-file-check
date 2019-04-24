@@ -16,23 +16,23 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.checkInFile",
-				"title": "Check In File"
+				"command": "extension.checkInCurrentFile",
+				"title": "Check In Current File"
 			},
 			{
-				"command": "extension.checkOutFile",
-				"title": "Check Out File"
+				"command": "extension.checkOutCurrentFile",
+				"title": "Check Out Current File"
 			},
 			{
-				"command": "extension.dwPushFile",
-				"title": "Push File"
+				"command": "extension.dwPushCurrentFile",
+				"title": "Push Current File"
 			},
 			{
-				"command": "extension.dwPullFile",
-				"title": "Pull File"
+				"command": "extension.dwPullCurrentFile",
+				"title": "Pull Current File"
 			},
 			{
-				"command": "extension.dwSaveFile",
+				"command": "extension.dwSaveCurrentFile",
 				"title": "Save File"
 			}
 		]

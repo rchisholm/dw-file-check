@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	
-	let checkInFile = vscode.commands.registerCommand('extension.checkInFile', () => {
+	let checkInCurrentFile = vscode.commands.registerCommand('extension.checkInCurrentFile', () => {
 		// check in file
 		vscode.window.showInformationMessage("Checking in...");
 		// if checked out by you, finish checkin
@@ -40,40 +40,16 @@ export function activate(context: vscode.ExtensionContext) {
 		if(vscode.window.activeTextEditor){
 			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
 			//vscode.window.showInformationMessage(currentFilePath);
-			let currentFileStatus = getFileStatus(context, currentFilePath);
 
-			if(currentFileStatus === "out") {
-				let currentFileOwner = getFileOwner(context, currentFilePath);
-				getUserName().then(name => {
-					if(currentFileOwner === name.toLowerCase()){
-						// file is checked out by you.
-						// vscode.window.showInformationMessage("File is checked out by you!");
-						finishCheckIn(context, currentFilePath);
-					}else{
-						// file is checked out by someone else
-						vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
-							if(choice === "Confirm"){
-								finishCheckIn(context, currentFilePath);
-							}
-						});
-					}
-				});
-			}else if(currentFileStatus === "locked"){
-				//file is locked
-				vscode.window.showWarningMessage("File is locked. Already checked in.");
-				//do nothing
-			}else if(currentFileStatus === "unlocked"){
-				//file is unlocked
-				//vscode.window.showInformationMessage("File is unlocked.");
-				finishCheckIn(context, currentFilePath);
-			}
+			checkInFile(context, currentFilePath);
+
 		} else {
 			vscode.window.showInformationMessage("No open file.");
 		}
 
 	});
 
-	let checkOutFile = vscode.commands.registerCommand('extension.checkOutFile', () => {
+	let checkOutCurrentFile = vscode.commands.registerCommand('extension.checkOutCurrentFile', () => {
 		// check out file
 		vscode.window.showInformationMessage("Checking out...");
 		// if checked out by you, do nothing
@@ -85,39 +61,15 @@ export function activate(context: vscode.ExtensionContext) {
 		if(vscode.window.activeTextEditor){
 			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
 			//vscode.window.showInformationMessage(currentFilePath);
-			let currentFileStatus = getFileStatus(context, currentFilePath);
 
-			if(currentFileStatus === "out") {
-				let currentFileOwner = getFileOwner(context, currentFilePath);
-				getUserName().then(name => {
-					if(currentFileOwner === name.toLowerCase()){
-						// file is checked out by you.
-						vscode.window.showInformationMessage("File is already checked out by you.");
-					}else{
-						// file is checked out by someone else
-						vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
-							if(choice === "Confirm"){
-								//delete their .LCK file
-								deleteLockFile(currentFilePath);
-								//finish checkout
-								finishCheckOut(context, currentFilePath);
-							}
-						});
-					}
-				});
-			}else if(currentFileStatus === "locked"){
-				//file is locked
-				finishCheckOut(context, currentFilePath);
-			}else if(currentFileStatus === "unlocked"){
-				//file is unlocked
-				finishCheckOut(context, currentFilePath);
-			}
+			checkOutFile(context, currentFilePath);
+
 		} else {
 			vscode.window.showErrorMessage("No open file.");
 		}
 	});
 
-	let dwPushFile = vscode.commands.registerCommand('extension.dwPushFile', () => {
+	let dwPushCurrentFile = vscode.commands.registerCommand('extension.dwPushCurrentFile', () => {
 		// called on push file
 
 		// if locked OR checked out by someone else: disallow; warn user they should check the file out.
@@ -132,8 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
 				getUserName().then(name => {
 					if(currentFileOwner === name.toLowerCase()){
 						// file is checked out by you.
-						// nativeSaveFile();
-						vscode.window.showInformationMessage("(save file.)");
+						pushCurrentFile();
 					}else{
 						// file is checked out by someone else
 						vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to push.");
@@ -152,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	let dwPullFile = vscode.commands.registerCommand('extension.dwPullFile', () => {
+	let dwPullCurrentFile = vscode.commands.registerCommand('extension.dwPullCurrentFile', () => {
 		// called on pull file
 
 		// always allow
@@ -173,8 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
 				getUserName().then(name => {
 					if(currentFileOwner === name.toLowerCase()){
 						// file is checked out by you.
-						// nativeSaveFile();
-						vscode.window.showInformationMessage("(save file.)");
+						nativeSaveFile();
 					}else{
 						// file is checked out by someone else
 						vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to save.");
@@ -185,70 +135,154 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showErrorMessage("File is locked. Please check file out to save.");
 			}else if(currentFileStatus === "unlocked"){
 				// file is unlocked
-				// nativeSaveFile();
-				vscode.window.showInformationMessage("(save file.)");
+				nativeSaveFile();
 			}
 		} else {
 			vscode.window.showErrorMessage("No open file.");
 		}
 	});
 
-	context.subscriptions.push(checkInFile, checkOutFile, dwPushFile, dwPullFile, dwSaveFile);
+	context.subscriptions.push(checkInCurrentFile, checkOutCurrentFile, dwPushCurrentFile, dwPullCurrentFile, dwSaveFile);
 	
 }
 
-function onStart(context: vscode.ExtensionContext) {
-	// called on open workspace
 
-	// check all files for local .LCK files, and read-only status. for each file:
-	// if .LCK file: mark as checked out by that person.
-	// else: 
-	//   if readonly: mark as locked.
-	//   else: mark as unlocked.
-
-	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms}/**")
-		.then((uris) => {
+//check all files for local .LCK files, and read-only status
+function onStart(context: vscode.ExtensionContext){
+	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms,.vscode}/**")
+	.then((uris) => {
+		if(uris.length > 0) {
 			uris.forEach((uri) => {
-				if(isReadOnly(uri.fsPath)){
-					context.workspaceState.update("status:" + uri.fsPath, "locked");
-					console.log(uri.fsPath + " is locked.");
-				} else {
-					context.workspaceState.update("status:" + uri.fsPath, "unlocked");
-					//console.log(uri.fsPath + " is unlocked.");
-				}
+				updateFileStatusByURI(context, uri);
 			});
-			vscode.workspace.findFiles("**/*.LCK", "**/{node_modules,tns_modules,platforms}/**")
-			.then((uris) => {
-				if(uris.length > 0) {
-					uris.forEach((uri) => {
-						let file = vscode.workspace.openTextDocument(uri);
-						file.then((file) =>{
-							let ownerName = file.getText().split("||")[0];
-							let filePath = uri.fsPath.split(".LCK")[0];
-							//console.log(filePath);
-							if(ownerName.length > 0){
-								console.log(ownerName + " owns file " + filePath);
-								context.workspaceState.update("status:" + filePath, "out");
-								context.workspaceState.update("owner:" + filePath, ownerName);
-							}else{
-								console.log("no owner for file " + filePath);
-								context.workspaceState.update("owner:" + filePath, ownerName);
-							}
-						});
-					});
-					console.log("Status of all files checked.");
-				}
-			});
+		}
+	});
+}
+
+// //long, older version of onStart()
+// function onStartAlt(context: vscode.ExtensionContext) {
+// 	// called on open workspace
+
+// 	// check all files for local .LCK files, and read-only status. for each file:
+// 	// if .LCK file: mark as checked out by that person.
+// 	// else: 
+// 	//   if readonly: mark as locked.
+// 	//   else: mark as unlocked.
+
+// 	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms}/**")
+// 		.then((uris) => {
+// 			uris.forEach((uri) => {
+// 				if(isReadOnly(uri.fsPath)){
+// 					context.workspaceState.update("status:" + uri.fsPath, "locked");
+// 					console.log(uri.fsPath + " is locked.");
+// 				} else {
+// 					context.workspaceState.update("status:" + uri.fsPath, "unlocked");
+// 					//console.log(uri.fsPath + " is unlocked.");
+// 				}
+// 			});
+// 			vscode.workspace.findFiles("**/*.LCK", "**/{node_modules,tns_modules,platforms}/**")
+// 			.then((uris) => {
+// 				if(uris.length > 0) {
+// 					uris.forEach((uri) => {
+// 						let file = vscode.workspace.openTextDocument(uri);
+// 						file.then((file) =>{
+// 							let ownerName = file.getText().split("||")[0];
+// 							let filePath = uri.fsPath.split(".LCK")[0];
+// 							//console.log(filePath);
+// 							if(ownerName.length > 0){
+// 								console.log(filePath + " checked out by " + ownerName);
+// 								context.workspaceState.update("status:" + filePath, "out");
+// 							}else{
+// 								console.log(filePath + " checked out WITH NO OWNER");
+// 							}
+// 							context.workspaceState.update("owner:" + filePath, ownerName);
+// 						});
+// 					});
+// 					console.log("Status of all files checked.");
+// 				}
+// 			});
+// 		});
+
+
+// 	// CSS to display some markup before row in explorer file tree:
+// 	// .monaco-list-row .monaco-tl-row::before {
+// 		// content: '\f03f'; <-- checkmark, lock, etc.
+// 		// color: 'red'; <-- red, green, black
+// 		// position: absolute;
+// 		// font: normal normal normal 16px/1 octicons;
+// 	// }
+// }
+
+// //alt version of onStart()
+// function onStartAlt2(context: vscode.ExtensionContext){
+// 	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms,.vscode}/**")
+// 	.then((uris) => {
+// 		if(uris.length > 0) {
+// 			uris.forEach((uri) => {
+// 				updateFileStatusByPath(context, uri.fsPath);
+// 			});
+// 		}
+// 	});
+// }
+
+// PSEUDOCODE FOR "updateFileStatus...()"
+//	if (there is a file "path + '.LCK'") 
+//		file status is "out" {
+//		if (the lock file's content contains a string before '||'){
+//			file owner is that string
+//		}
+//	} else if (the file is readonly) {
+//		file status is "locked"
+//	} else {
+//		file status is "unlocked"
+//	}
+
+	
+
+//updates the status of a single file by fsPath
+function updateFileStatusByPath(context: vscode.ExtensionContext, path: string){
+	let lockFileUri = vscode.Uri.file(path + ".LCK");
+	if(lockFileUri) {
+		vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+			let ownerName = file.getText().split("||")[0];
+			let filePath = lockFileUri.fsPath.split(".LCK")[0];
+			//console.log(filePath);
+			context.workspaceState.update("status:" + filePath, "out");
+			context.workspaceState.update("owner:" + filePath, ownerName);
+			console.log(filePath + " checked out by " + ownerName);
+		},()=> {
+			if(isReadOnly(path)){
+				context.workspaceState.update("status:" + path, "locked");
+				console.log(path + " is locked.");
+			} else {
+				context.workspaceState.update("status:" + path, "unlocked");
+				console.log(path + " is unlocked.");
+			}
 		});
+	}
+}
 
-
-	// CSS to display some markup before row in explorer file tree:
-	// .monaco-list-row .monaco-tl-row::before {
-		// content: '\f03f'; <-- checkmark, lock, etc.
-		// color: 'red'; <-- red, green, black
-		// position: absolute;
-		// font: normal normal normal 16px/1 octicons;
-	// }
+//updates the status of a single file by URI
+function updateFileStatusByURI(context: vscode.ExtensionContext, uri: vscode.Uri){
+	let lockFileUri = vscode.Uri.file(uri.fsPath + ".LCK");
+	if(lockFileUri) {
+		vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+			let ownerName = file.getText().split("||")[0];
+			let filePath = lockFileUri.fsPath.split(".LCK")[0];
+			//console.log(filePath);
+			context.workspaceState.update("status:" + filePath, "out");
+			context.workspaceState.update("owner:" + filePath, ownerName);
+			console.log(filePath + " checked out by " + ownerName);
+		},() =>{
+			if(isReadOnly(uri.fsPath)){
+				context.workspaceState.update("status:" + uri.fsPath, "locked");
+				console.log(uri.fsPath + " is locked.");
+			} else {
+				context.workspaceState.update("status:" + uri.fsPath, "unlocked");
+				console.log(uri.fsPath + " is unlocked.");
+			}
+		});
+	}
 }
 
 function getUserName(){
@@ -375,29 +409,89 @@ function deleteLockFile(path: string){
 
 /////////////////////////////////////////////////////////////////////////////////
 
+function checkInFile(context: vscode.ExtensionContext, currentFilePath: string){
+	let currentFileStatus = getFileStatus(context, currentFilePath);
+	
+	if(currentFileStatus === "out") {
+		let currentFileOwner = getFileOwner(context, currentFilePath);
+		getUserName().then(name => {
+			if(currentFileOwner === name.toLowerCase()){
+				// file is checked out by you.
+				// vscode.window.showInformationMessage("File is checked out by you!");
+				finishCheckIn(context, currentFilePath);
+			}else{
+				// file is checked out by someone else
+				vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
+					if(choice === "Confirm"){
+						finishCheckIn(context, currentFilePath);
+					}
+				});
+			}
+		});
+	}else if(currentFileStatus === "locked"){
+		//file is locked
+		vscode.window.showWarningMessage("File is locked. Already checked in.");
+		//do nothing
+	}else if(currentFileStatus === "unlocked"){
+		//file is unlocked
+		//vscode.window.showInformationMessage("File is unlocked.");
+		finishCheckIn(context, currentFilePath);
+	}
+}
+
 function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	// remove local+remote  .LCK
-	// add readonly to local
 	// mark as locked
 	// push to remote
+	// add readonly to local
 
 	//remove local .LCK file 
 	deleteLockFile(path);
 
 	//need to remove remote .LCK file (maybe not)
 
-	//remove readonly from local
-	setReadOnly(path);
-
 	//set file status
 	setFileStatus(context, path, "locked");
 	setFileOwner(context, path, "");
 
-	//push to remove
+	//push to remote
 	pushCurrentFile();
+
+	//remove readonly from local
+	setReadOnly(path);
 	
 	vscode.window.showInformationMessage("File checked in.");
 	return null;
+}
+
+function checkOutFile(context: vscode.ExtensionContext, currentFilePath: string) {
+	let currentFileStatus = getFileStatus(context, currentFilePath);
+
+	if(currentFileStatus === "out") {
+		let currentFileOwner = getFileOwner(context, currentFilePath);
+		getUserName().then(name => {
+			if(currentFileOwner === name.toLowerCase()){
+				// file is checked out by you.
+				vscode.window.showInformationMessage("File is already checked out by you.");
+			}else{
+				// file is checked out by someone else
+				vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
+					if(choice === "Confirm"){
+						//delete their .LCK file
+						deleteLockFile(currentFilePath);
+						//finish checkout
+						finishCheckOut(context, currentFilePath);
+					}
+				});
+			}
+		});
+	}else if(currentFileStatus === "locked"){
+		//file is locked
+		finishCheckOut(context, currentFilePath);
+	}else if(currentFileStatus === "unlocked"){
+		//file is unlocked
+		finishCheckOut(context, currentFilePath);
+	}
 }
 
 function finishCheckOut(context: vscode.ExtensionContext, path: string){
@@ -412,9 +506,6 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 
 	//need to push the .LCK file (maybe not)
 
-	//remove readonly from local
-	removeReadOnly(path);
-
 	//set status and owner
 	setFileStatus(context, path, "out");
 	getUserName().then(name => {
@@ -423,6 +514,9 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 
 	//pull current file
 	pullCurrentFile();
+	
+	//remove readonly from local
+	removeReadOnly(path);
 
 	vscode.window.showInformationMessage("File checked out.");
 	return null;
@@ -430,6 +524,7 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 
 function nativeSaveFile(){
 	//save the file
+	vscode.window.showInformationMessage("(save file)");
 }
 
 // this method is called when your extension is deactivated
