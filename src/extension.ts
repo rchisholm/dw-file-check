@@ -205,16 +205,52 @@ function updateFileStatusByPath(context: vscode.ExtensionContext, path: string){
 	}
 }
 
+//gets the status of a single file by fsPath
+function getFileStatusByPath(path: string): string {
+	let lockFileUri = vscode.Uri.file(path + ".LCK");
+	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+		return "out";
+	},()=> {
+		if(isReadOnly(path)){
+			return "locked";
+		} else {
+			return "unlocked";
+		}
+	});
+	console.log("error - no status returned for " + path);
+	return "unlocked";
+}
+
+//gets the owner of a single file by fsPath
+function getFileOwnerByPath(path: string): string{
+	let lockFileUri = vscode.Uri.file(path + ".LCK");
+	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+		let ownerName = file.getText().split("||")[0];
+		//console.log(filePath);
+		return ownerName;
+	},()=> {
+		//rejected
+		return "";
+	});
+	console.log("error - no owner returned for " + path);
+	return "";
+}
+
+
 function getUserName(){
 	return username();
 }
 
 function getFileStatus(context: vscode.ExtensionContext, path: string){
-	return context.workspaceState.get("status:" + path);
+	//updateFileStatusByPath(context, path);
+	//return context.workspaceState.get("status:" + path);
+	return getFileStatusByPath(path);
 }
 
 function getFileOwner(context: vscode.ExtensionContext, path: string){
-	return context.workspaceState.get("owner:" + path);
+	//updateFileStatusByPath(context, path);
+	//return context.workspaceState.get("owner:" + path);
+	return getFileOwnerByPath(path);
 }
 
 function setFileStatus(context: vscode.ExtensionContext, path: string, status: string){
@@ -395,14 +431,16 @@ function checkOutFile(context: vscode.ExtensionContext, currentFilePath: string)
 				vscode.window.showInformationMessage("File is already checked out by you.");
 			}else{
 				// file is checked out by someone else
-				vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"]).then(choice => {
-					if(choice === "Confirm"){
-						//delete their .LCK file
-						deleteLockFile(currentFilePath);
-						//finish checkout
-						finishCheckOut(context, currentFilePath);
+				vscode.window.showWarningMessage("File is checked out by " + currentFileOwner + ". Override his/her checkout?", 
+					...["Confirm", "Cancel"]).then(choice => {
+						if(choice === "Confirm"){
+							//delete their .LCK file
+							deleteLockFile(currentFilePath);
+							//finish checkout
+							finishCheckOut(context, currentFilePath);
+						}
 					}
-				});
+				);
 			}
 		});
 	}else if(currentFileStatus === "locked"){
@@ -432,12 +470,14 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 		setFileOwner(context, path, name.toLowerCase());
 	});
 
-	vscode.window.showWarningMessage("Pull file from remote server?", ...["Yes", "No"]).then(choice => {
-		if(choice === "Yes"){
-			//pull current file
-			pullCurrentFile();
+	vscode.window.showWarningMessage("Pull file from remote server?", 
+		...["Yes", "No"]).then(choice => {
+			if(choice === "Yes"){
+				//pull current file
+				pullCurrentFile();
+			}
 		}
-	});
+	);
 	
 	//remove readonly from local
 	removeReadOnly(path);
