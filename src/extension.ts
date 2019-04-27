@@ -21,129 +21,173 @@ export function activate(context: vscode.ExtensionContext) {
 		//console.log("deploy.reloaded found!");
 		vscode.window.showInformationMessage("Deploy extenson loaded.");
 		onStart(context);
+
+		let pullButton: vscode.StatusBarItem;
+		let pushButton: vscode.StatusBarItem;
+		let checkOutButton: vscode.StatusBarItem;
+		let checkInButton: vscode.StatusBarItem;
+
+		pullButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 23);
+		pushButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 22);
+		checkOutButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 21);
+		checkInButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 20);
+
+		pullButton.command = 'extension.dwPullCurrentFile';
+		pushButton.command = 'extension.dwPushCurrentFile';
+		checkOutButton.command = 'extension.checkOutCurrentFile';
+		checkInButton.command = 'extension.checkInCurrentFile';
+
+		pullButton.text = "Pull File $(arrow-down)";
+		pushButton.text = "Push File $(arrow-up)";
+		checkOutButton.text = "Check Out $(check)";
+		checkInButton.text = "Check In $(lock)";
+
+		pullButton.color = "#bada55";
+		pushButton.color = "#00ffff";
+		checkOutButton.color="#00ff00";
+		checkInButton.color="#ffa500";
+
+		context.subscriptions.push(pullButton, pushButton, checkOutButton, checkInButton);
+
+		pullButton.show();
+		pushButton.show();
+		checkOutButton.show();
+		checkInButton.show();
+
+	
+		// ################################################################################################################################
+		// ################################################################################################################################
+		// ################################################################################################################################
+		// ################################################################################################################################
+		
+
+		// The command has been defined in the package.json file
+		// Now provide the implementation of the command with registerCommand
+		// The commandId parameter must match the command field in package.json
+		
+		let checkInCurrentFile = vscode.commands.registerCommand('extension.checkInCurrentFile', () => {
+			// check in file
+			vscode.window.showInformationMessage("Checking in...");
+			// if checked out by you, finish checkin
+			// if checked out by someone else, prompt warning confirm/cancel
+			//   - on confirm: finish checkin
+			// if locked, do nothing
+			// if unlocked, finish checkin
+
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				//vscode.window.showInformationMessage(currentFilePath);
+
+				checkInFile(context, currentFilePath);
+
+			} else {
+				vscode.window.showInformationMessage("No open file.");
+			}
+
+		});
+
+		let checkOutCurrentFile = vscode.commands.registerCommand('extension.checkOutCurrentFile', () => {
+			// check out file
+			vscode.window.showInformationMessage("Checking out...");
+			// if checked out by you, do nothing
+			// if checked out by someone else, prompt warning confirm/cancel
+			//   - on confirm: finish checkout
+			// if locked, remove readonly, finish Checkout
+			// if unlocked, finishCheckout
+
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				//vscode.window.showInformationMessage(currentFilePath);
+
+				checkOutFile(context, currentFilePath);
+
+			} else {
+				vscode.window.showErrorMessage("No open file.");
+			}
+		});
+
+		let dwPushCurrentFile = vscode.commands.registerCommand('extension.dwPushCurrentFile', () => {
+			// called on push file
+
+			// if locked OR checked out by someone else: disallow; warn user they should check the file out.
+			// else: allow
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				//vscode.window.showInformationMessage(currentFilePath);
+				let currentFileStatus = getFileStatus(context, currentFilePath);
+
+				if(currentFileStatus === "out") {
+					let currentFileOwner = getFileOwner(context, currentFilePath);
+					getUserName().then(name => {
+						if(currentFileOwner === name.toLowerCase()){
+							// file is checked out by you.
+							pushCurrentFile();
+						}else{
+							// file is checked out by someone else
+							vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to push.");
+						}
+					});
+				}else if(currentFileStatus === "locked"){
+					// file is locked
+					vscode.window.showErrorMessage("File is locked. Please check file out to push.");
+				}else if(currentFileStatus === "unlocked"){
+					// file is unlocked
+					pushCurrentFile();
+				}
+			} else {
+				vscode.window.showErrorMessage("No open file.");
+			}
+
+		});
+
+		let dwPullCurrentFile = vscode.commands.registerCommand('extension.dwPullCurrentFile', () => {
+			// called on pull file
+
+			// always allow
+			pullCurrentFile();
+		});
+
+		let dwSaveFile = vscode.commands.registerCommand('extension.dwSaveFile', () => {
+			// called on save file:
+			// if locked OR checked out by someone else: disallow; warn user they should check the file out.
+			// else: allow
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				//vscode.window.showInformationMessage(currentFilePath);
+				let currentFileStatus = getFileStatus(context, currentFilePath);
+
+				if(currentFileStatus === "out") {
+					let currentFileOwner = getFileOwner(context, currentFilePath);
+					getUserName().then(name => {
+						if(currentFileOwner === name.toLowerCase()){
+							// file is checked out by you.
+							nativeSaveFile();
+						}else{
+							// file is checked out by someone else
+							vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to save.");
+						}
+					});
+				}else if(currentFileStatus === "locked"){
+					// file is locked
+					vscode.window.showErrorMessage("File is locked. Please check file out to save.");
+				}else if(currentFileStatus === "unlocked"){
+					// file is unlocked
+					nativeSaveFile();
+				}
+			} else {
+				vscode.window.showErrorMessage("No open file.");
+			}
+		});
+
+		context.subscriptions.push(checkInCurrentFile, checkOutCurrentFile, dwPushCurrentFile, dwPullCurrentFile, dwSaveFile);
+
+		// ################################################################################################################################
+		// ################################################################################################################################
+		// ################################################################################################################################
+		// ################################################################################################################################
+	
 	}
-	
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	
-	let checkInCurrentFile = vscode.commands.registerCommand('extension.checkInCurrentFile', () => {
-		// check in file
-		vscode.window.showInformationMessage("Checking in...");
-		// if checked out by you, finish checkin
-		// if checked out by someone else, prompt warning confirm/cancel
-		//   - on confirm: finish checkin
-		// if locked, do nothing
-		// if unlocked, finish checkin
-
-		if(vscode.window.activeTextEditor){
-			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-			//vscode.window.showInformationMessage(currentFilePath);
-
-			checkInFile(context, currentFilePath);
-
-		} else {
-			vscode.window.showInformationMessage("No open file.");
-		}
-
-	});
-
-	let checkOutCurrentFile = vscode.commands.registerCommand('extension.checkOutCurrentFile', () => {
-		// check out file
-		vscode.window.showInformationMessage("Checking out...");
-		// if checked out by you, do nothing
-		// if checked out by someone else, prompt warning confirm/cancel
-		//   - on confirm: finish checkout
-		// if locked, remove readonly, finish Checkout
-		// if unlocked, finishCheckout
-
-		if(vscode.window.activeTextEditor){
-			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-			//vscode.window.showInformationMessage(currentFilePath);
-
-			checkOutFile(context, currentFilePath);
-
-		} else {
-			vscode.window.showErrorMessage("No open file.");
-		}
-	});
-
-	let dwPushCurrentFile = vscode.commands.registerCommand('extension.dwPushCurrentFile', () => {
-		// called on push file
-
-		// if locked OR checked out by someone else: disallow; warn user they should check the file out.
-		// else: allow
-		if(vscode.window.activeTextEditor){
-			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-			//vscode.window.showInformationMessage(currentFilePath);
-			let currentFileStatus = getFileStatus(context, currentFilePath);
-
-			if(currentFileStatus === "out") {
-				let currentFileOwner = getFileOwner(context, currentFilePath);
-				getUserName().then(name => {
-					if(currentFileOwner === name.toLowerCase()){
-						// file is checked out by you.
-						pushCurrentFile();
-					}else{
-						// file is checked out by someone else
-						vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to push.");
-					}
-				});
-			}else if(currentFileStatus === "locked"){
-				// file is locked
-				vscode.window.showErrorMessage("File is locked. Please check file out to push.");
-			}else if(currentFileStatus === "unlocked"){
-				// file is unlocked
-				pushCurrentFile();
-			}
-		} else {
-			vscode.window.showErrorMessage("No open file.");
-		}
-
-	});
-
-	let dwPullCurrentFile = vscode.commands.registerCommand('extension.dwPullCurrentFile', () => {
-		// called on pull file
-
-		// always allow
-		pullCurrentFile();
-	});
-
-	let dwSaveFile = vscode.commands.registerCommand('extension.dwSaveFile', () => {
-		// called on save file:
-		// if locked OR checked out by someone else: disallow; warn user they should check the file out.
-		// else: allow
-		if(vscode.window.activeTextEditor){
-			let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-			//vscode.window.showInformationMessage(currentFilePath);
-			let currentFileStatus = getFileStatus(context, currentFilePath);
-
-			if(currentFileStatus === "out") {
-				let currentFileOwner = getFileOwner(context, currentFilePath);
-				getUserName().then(name => {
-					if(currentFileOwner === name.toLowerCase()){
-						// file is checked out by you.
-						nativeSaveFile();
-					}else{
-						// file is checked out by someone else
-						vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to save.");
-					}
-				});
-			}else if(currentFileStatus === "locked"){
-				// file is locked
-				vscode.window.showErrorMessage("File is locked. Please check file out to save.");
-			}else if(currentFileStatus === "unlocked"){
-				// file is unlocked
-				nativeSaveFile();
-			}
-		} else {
-			vscode.window.showErrorMessage("No open file.");
-		}
-	});
-
-	context.subscriptions.push(checkInCurrentFile, checkOutCurrentFile, dwPushCurrentFile, dwPullCurrentFile, dwSaveFile);
-	
 }
 
 
@@ -243,14 +287,14 @@ function getUserName(){
 
 function getFileStatus(context: vscode.ExtensionContext, path: string){
 	//updateFileStatusByPath(context, path);
-	//return context.workspaceState.get("status:" + path);
-	return getFileStatusByPath(path);
+	return context.workspaceState.get("status:" + path);
+	//return getFileStatusByPath(path);
 }
 
 function getFileOwner(context: vscode.ExtensionContext, path: string){
 	//updateFileStatusByPath(context, path);
-	//return context.workspaceState.get("owner:" + path);
-	return getFileOwnerByPath(path);
+	return context.workspaceState.get("owner:" + path);
+	//return getFileOwnerByPath(path);
 }
 
 function setFileStatus(context: vscode.ExtensionContext, path: string, status: string){
@@ -265,35 +309,11 @@ function isReadOnly(path: string){
 	return ((fs.statSync(path).mode & 146) === 0);
 }
 
-//doesn't work
-// function setReadOnly(path:string){
-// 	function transform(path: fs.PathLike, cb: (arg0: null, arg1: fs.PathLike) => void){
-// 	  if((fs.statSync(path).mode & 146) !== 0){
-// 		//fs.statSync(path).mode = fs.statSync(path).mode & 146;
-// 		fs.chmodSync(path, fs.statSync(path).mode & 146);
-// 	  }
-// 	  cb(null, path);
-// 	}
-// 	return require('event-stream').map(transform);
-// }
-
 function setReadOnly(path:string){
 	if(!isReadOnly(path)){
 		fs.chmodSync(path, fs.statSync(path).mode & 292);
 	}
 }
-
-//doesn't work
-// function removeReadOnly(path:string){
-// 	function transform(path: fs.PathLike, cb: (arg0: null, arg1: fs.PathLike) => void){
-// 	  if((fs.statSync(path).mode & 146) === 0){
-// 		//fs.statSync(path).mode = fs.statSync(path).mode | 146;
-// 		fs.chmodSync(path, fs.statSync(path).mode | 146);
-// 	  }
-// 	  cb(null, path);
-// 	}
-// 	return require('event-stream').map(transform);
-// }
 
 function removeReadOnly(path:string){
 	if(isReadOnly(path)){
@@ -413,7 +433,7 @@ function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	//push to remote
 	pushCurrentFile();
 
-	//remove readonly from local
+	//set readonly on local
 	setReadOnly(path);
 	
 	vscode.window.showInformationMessage("File checked in.");
@@ -490,6 +510,7 @@ function nativeSaveFile(){
 	//save the file
 	vscode.window.showInformationMessage("(save file)");
 }
+
 
 // this method is called when your extension is deactivated
 export function deactivate() {}
