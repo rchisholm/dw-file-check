@@ -118,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				if(currentFileStatus === "out") {
 					let currentFileOwner = getFileOwner(context, currentFilePath);
-					getUserName().then(name => {
+					username().then(name => {
 						if(currentFileOwner === name.toLowerCase()){
 							// file is checked out by you.
 							pushCurrentFile();
@@ -158,7 +158,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				if(currentFileStatus === "out") {
 					let currentFileOwner = getFileOwner(context, currentFilePath);
-					getUserName().then(name => {
+					username().then(name => {
 						if(currentFileOwner === name.toLowerCase()){
 							// file is checked out by you.
 							nativeSaveFile();
@@ -280,11 +280,6 @@ function getFileOwnerByPath(path: string): string{
 	return "";
 }
 
-
-function getUserName(){
-	return username();
-}
-
 function getFileStatus(context: vscode.ExtensionContext, path: string){
 	//updateFileStatusByPath(context, path);
 	return context.workspaceState.get("status:" + path);
@@ -367,7 +362,7 @@ function pushCurrentFile(){
 
 function createLockFile(path: string){
 	let lockFilePath = path + ".LCK";
-	getUserName().then(name => {
+	username().then(name => {
 		fs.writeFile(lockFilePath, name.toLowerCase() + "||" + name.toLowerCase() + "@marian.org", function (err) {
 			if (err) { throw err; }
 			//console.log('.LCK file saved!');
@@ -390,7 +385,7 @@ function checkInFile(context: vscode.ExtensionContext, currentFilePath: string){
 	
 	if(currentFileStatus === "out") {
 		let currentFileOwner = getFileOwner(context, currentFilePath);
-		getUserName().then(name => {
+		username().then(name => {
 			if(currentFileOwner === name.toLowerCase()){
 				// file is checked out by you.
 				// vscode.window.showInformationMessage("File is checked out by you!");
@@ -445,7 +440,7 @@ function checkOutFile(context: vscode.ExtensionContext, currentFilePath: string)
 
 	if(currentFileStatus === "out") {
 		let currentFileOwner = getFileOwner(context, currentFilePath);
-		getUserName().then(name => {
+		username().then(name => {
 			if(currentFileOwner === name.toLowerCase()){
 				// file is checked out by you.
 				vscode.window.showInformationMessage("File is already checked out by you.");
@@ -486,7 +481,7 @@ function finishCheckOut(context: vscode.ExtensionContext, path: string){
 
 	//set status and owner
 	setFileStatus(context, path, "out");
-	getUserName().then(name => {
+	username().then(name => {
 		setFileOwner(context, path, name.toLowerCase());
 	});
 
