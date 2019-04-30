@@ -1,8 +1,14 @@
+/**
+ * contains the functions used in the commands for dw-file-check
+ */
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as username from 'username';
 
-//check all files for local .LCK files, and read-only status
+/**
+ * check all files for local .LCK files, and read-only status
+ * @param context vscode extension context
+ */
 export function onStart(context: vscode.ExtensionContext){
 	vscode.workspace.findFiles("**/*", "**/{node_modules,tns_modules,platforms,.vscode}/**")
 	.then((uris) => {
@@ -14,7 +20,11 @@ export function onStart(context: vscode.ExtensionContext){
 	});
 }
 
-//updates the status of a single file by URI
+/**
+ * updates the status of a single file by URI
+ * @param context 
+ * @param uri 
+ */
 export function updateFileStatusByURI(context: vscode.ExtensionContext, uri: vscode.Uri){
 	let lockFileUri = vscode.Uri.file(uri.fsPath + ".LCK");
 	if(lockFileUri) {
@@ -37,7 +47,11 @@ export function updateFileStatusByURI(context: vscode.ExtensionContext, uri: vsc
 	}
 }
 
-//updates the status of a single file by fsPath
+/**
+ * updates the status of a single file by fsPath
+ * @param context vscode extension context
+ * @param path fs path of the file to update
+ */
 export function updateFileStatusByPath(context: vscode.ExtensionContext, path: string){
 	let lockFileUri = vscode.Uri.file(path + ".LCK");
 	if(lockFileUri) {
@@ -60,7 +74,10 @@ export function updateFileStatusByPath(context: vscode.ExtensionContext, path: s
 	}
 }
 
-//gets the status of a single file by fsPath
+/**
+ * gets the status of a single file by fsPath
+ * @param path fs path of the file
+ */
 export function getFileStatusByPath(path: string): string {
 	let lockFileUri = vscode.Uri.file(path + ".LCK");
 	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
@@ -76,7 +93,10 @@ export function getFileStatusByPath(path: string): string {
 	return "unlocked";
 }
 
-//gets the owner of a single file by fsPath
+/**
+ * gets the owner of a single file by fsPath
+ * @param path fs path of the file
+ */
 export function getFileOwnerByPath(path: string): string{
 	let lockFileUri = vscode.Uri.file(path + ".LCK");
 	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
@@ -91,42 +111,79 @@ export function getFileOwnerByPath(path: string): string{
 	return "";
 }
 
+/**
+ * get file status from workspace state
+ * @param context vscode extension context
+ * @param path fs path of the file
+ */
 export function getFileStatus(context: vscode.ExtensionContext, path: string){
 	//updateFileStatusByPath(context, path);
 	return context.workspaceState.get("status:" + path);
 	//return getFileStatusByPath(path);
 }
 
+/**
+ * get file owner from workspace state
+ * @param context vscode extension context
+ * @param path fs path of the file
+ */
 export function getFileOwner(context: vscode.ExtensionContext, path: string){
 	//updateFileStatusByPath(context, path);
 	return context.workspaceState.get("owner:" + path);
 	//return getFileOwnerByPath(path);
 }
 
+/**
+ * set file status in workspace state
+ * @param context vscode extension context
+ * @param path fs path of the file
+ * @param status the status: "out", "locked", or "unlocked"
+ */
 export function setFileStatus(context: vscode.ExtensionContext, path: string, status: string){
 	context.workspaceState.update("status:" + path, status);
 }
 
+/**
+ * set file owner in workspace state
+ * @param context vscode extension context
+ * @param path fs path of the file
+ * @param owner file owner name
+ */
 export function setFileOwner(context: vscode.ExtensionContext, path: string, owner: string){
 	context.workspaceState.update("owner:" + path, owner);
 }
 
+/**
+ * return true if file is readonly
+ * @param path fs path of the file
+ */
 export function isReadOnly(path: string){
 	return ((fs.statSync(path).mode & 146) === 0);
 }
 
+/**
+ * set file to readonly
+ * @param path fs path of the file
+ */
 export function setReadOnly(path:string){
 	if(!isReadOnly(path)){
 		fs.chmodSync(path, fs.statSync(path).mode & 292);
 	}
 }
 
+/**
+ * remove readonly status from file
+ * @param path fs path of the file
+ */
 export function removeReadOnly(path:string){
 	if(isReadOnly(path)){
 		fs.chmodSync(path, fs.statSync(path).mode | 146);
 	}
 }
 
+/**
+ * pull currently open file from server
+ */
 export function pullCurrentFile(){
 	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
 	// is the ext loaded and ready?
@@ -149,6 +206,9 @@ export function pullCurrentFile(){
 	}
 }
 
+/**
+ * push currently open file to server
+ */
 export function pushCurrentFile(){
 	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
 	// is the ext loaded and ready?
@@ -171,6 +231,10 @@ export function pushCurrentFile(){
 	}
 }
 
+/**
+ * create ".LCK" file with current user as owner
+ * @param path fs path of the file
+ */
 export function createLockFile(path: string){
 	let lockFilePath = path + ".LCK";
 	username().then(name => {
@@ -181,6 +245,10 @@ export function createLockFile(path: string){
 	});
 }
 
+/**
+ * remove ".LCK" file
+ * @param path fs path of the file
+ */
 export function deleteLockFile(path: string){
 	let lockFilePath = path + ".LCK";
 	fs.unlink(lockFilePath, function (err) {
@@ -189,6 +257,11 @@ export function deleteLockFile(path: string){
 	});
 }
 
+/**
+ * try to check in file
+ * @param context vscode extension context
+ * @param currentFilePath fs path of the file
+ */
 export function checkInFile(context: vscode.ExtensionContext, currentFilePath: string){
 	let currentFileStatus = getFileStatus(context, currentFilePath);
 	
@@ -219,11 +292,12 @@ export function checkInFile(context: vscode.ExtensionContext, currentFilePath: s
 	}
 }
 
+/**
+ * successfully check in file
+ * @param context vscode extension context
+ * @param path fs path of the file
+ */
 export function finishCheckIn(context: vscode.ExtensionContext, path: string){
-	// remove local+remote  .LCK
-	// mark as locked
-	// push to remote
-	// add readonly to local
 
 	//remove local .LCK file 
 	deleteLockFile(path);
@@ -244,6 +318,11 @@ export function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	return null;
 }
 
+/**
+ * try to check out file
+ * @param context vscode extension context
+ * @param currentFilePath fs path of the file
+ */
 export function checkOutFile(context: vscode.ExtensionContext, currentFilePath: string) {
 	let currentFileStatus = getFileStatus(context, currentFilePath);
 
@@ -276,12 +355,12 @@ export function checkOutFile(context: vscode.ExtensionContext, currentFilePath: 
 	}
 }
 
+/**
+ * successfully check out file
+ * @param context vscode extension context
+ * @param path fs path of the file
+ */
 export function finishCheckOut(context: vscode.ExtensionContext, path: string){
-
-	// add local+remote .LCK file
-	// remove readonly from local
-	// mark file as checked out
-	// pull from remote
 
 	//create local .LCK file 
 	createLockFile(path);
@@ -310,6 +389,9 @@ export function finishCheckOut(context: vscode.ExtensionContext, path: string){
 	return null;
 }
 
+/**
+ * save the file (not used)
+ */
 export function nativeSaveFile(){
 	//save the file
 	vscode.window.showInformationMessage("(save file)");

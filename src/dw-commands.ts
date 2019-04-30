@@ -1,7 +1,14 @@
+/**
+ * contains the commands for dw-file-check
+ */
 import * as dw from "./dw-functions";
 import * as vscode from 'vscode';
 import * as username from 'username';
 
+/**
+ * registers commands for dw-file-check
+ * @param context vscode Extension context
+ */
 export function registerDwCommands(context: vscode.ExtensionContext) {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
