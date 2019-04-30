@@ -48,6 +48,7 @@ export function startPushCurrentFile(context: vscode.ExtensionContext) {
         // else: allow
         if(vscode.window.activeTextEditor){
             let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+            let fileName = utils.getFileName(currentFilePath);
             //vscode.window.showInformationMessage(currentFilePath);
             let currentFileStatus = status.getFileStatus(context, currentFilePath);
 
@@ -59,12 +60,12 @@ export function startPushCurrentFile(context: vscode.ExtensionContext) {
                         pushCurrentFile();
                     }else{
                         // file is checked out by someone else
-                        vscode.window.showErrorMessage("File is checked out by " + currentFileOwner + ". Please check file out to push.");
+                        vscode.window.showErrorMessage(fileName + " is checked out by " + currentFileOwner + ". Please check file out to push.");
                     }
                 });
             }else if(currentFileStatus === "locked"){
                 // file is locked
-                vscode.window.showErrorMessage("File is locked. Please check file out to push.");
+                vscode.window.showErrorMessage(fileName + " is locked. Please check file out to push.");
             }else if(currentFileStatus === "unlocked"){
                 // file is unlocked
                 pushCurrentFile();
