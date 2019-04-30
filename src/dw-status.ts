@@ -1,9 +1,8 @@
 /**
  * contains functions for manipulating/reading file status and owner
  */
-
 import * as vscode from 'vscode';
-import { isReadOnly } from './dw-utils';
+import { isReadOnly, getFileName } from './dw-utils';
 
 /**
  * check all files for local .LCK files, and read-only status
@@ -34,14 +33,14 @@ export function updateFileStatusByURI(context: vscode.ExtensionContext, uri: vsc
 			//console.log(filePath);
 			context.workspaceState.update("status:" + filePath, "out");
 			context.workspaceState.update("owner:" + filePath, ownerName);
-			console.log(filePath + " checked out by " + ownerName);
+			console.log(getFileName(filePath) + " checked out by " + ownerName);
 		},() =>{
 			if(isReadOnly(uri.fsPath)){
 				context.workspaceState.update("status:" + uri.fsPath, "locked");
-				console.log(uri.fsPath + " is locked.");
+				console.log(getFileName(uri.fsPath) + " is locked.");
 			} else {
 				context.workspaceState.update("status:" + uri.fsPath, "unlocked");
-				console.log(uri.fsPath + " is unlocked.");
+				console.log(getFileName(uri.fsPath) + " is unlocked.");
 			}
 		});
 	}
@@ -61,14 +60,14 @@ export function updateFileStatusByPath(context: vscode.ExtensionContext, path: s
 			//console.log(filePath);
 			context.workspaceState.update("status:" + filePath, "out");
 			context.workspaceState.update("owner:" + filePath, ownerName);
-			console.log(filePath + " checked out by " + ownerName);
+			console.log(getFileName(filePath) + " checked out by " + ownerName);
 		},()=> {
 			if(isReadOnly(path)){
 				context.workspaceState.update("status:" + path, "locked");
-				console.log(path + " is locked.");
+				console.log(getFileName(path) + " is locked.");
 			} else {
 				context.workspaceState.update("status:" + path, "unlocked");
-				console.log(path + " is unlocked.");
+				console.log(getFileName(path) + " is unlocked.");
 			}
 		});
 	}
@@ -89,7 +88,7 @@ export function getFileStatusByPath(path: string): string {
 			return "unlocked";
 		}
 	});
-	console.log("error - no status returned for " + path);
+	console.log("error - no status returned for " + getFileName(path));
 	return "unlocked";
 }
 

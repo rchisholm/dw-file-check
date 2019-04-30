@@ -16,11 +16,11 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.checkInCurrentFile",
+				"command": "extension.dwCheckInCurrentFile",
 				"title": "Check In Current File"
 			},
 			{
-				"command": "extension.checkOutCurrentFile",
+				"command": "extension.dwCheckOutCurrentFile",
 				"title": "Check Out Current File"
 			},
 			{
@@ -34,8 +34,28 @@
 			{
 				"command": "extension.dwSaveCurrentFile",
 				"title": "Save File"
+			},
+			{
+			    "command": "extension.dwCheckFileStatus",
+			    "title": "Checkout Status..."
+			},
+			{
+			    "command": "extension.dwOpenFileOptions",
+			    "title": "DW File Options..."
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"command": "extension.dwCheckFileStatus",
+					"group": "dw-file-check"
+				},
+				{
+					"command": "extension.dwOpenFileOptions",
+					"group": "dw-file-check"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

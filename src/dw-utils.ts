@@ -1,10 +1,8 @@
 /**
  * contains fileSystem (fs) utilities
  */
-
 import * as fs from 'fs';
 import * as username from 'username';
-
 
 /**
  * return true if file is readonly
@@ -58,4 +56,21 @@ export function deleteLockFile(path: string){
 		if (err) { throw err; }
 		//console.log('.LCK file deleted!');
 	});
+}
+
+/**
+ * returns true if the file is a folder
+ * @param path fs path of the file
+ */
+export function isFolder(path: string) {
+	return fs.lstatSync(path).isDirectory();
+}
+
+/**
+ * get name of a file from the path
+ * @param path fs path of the file
+ */
+export function getFileName(path: string) {
+	let pathParts = path.split('\\');
+	return pathParts[pathParts.length-1];
 }

@@ -22,15 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showErrorMessage("Deploy reloaded not found! DW file check will not function.");
 	} else {
 		//console.log("deploy.reloaded found!");
-		vscode.window.showInformationMessage("Deploy extenson loaded.");
+		//vscode.window.showInformationMessage("Deploy extenson loaded.");
 		dw.onStart(context);
-
 		buttons.addDwButtons(context);
-		
 		commands.registerDwCommands(context);
-	
 	}
-
 }
 
 /**
