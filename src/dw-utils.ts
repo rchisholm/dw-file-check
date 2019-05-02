@@ -193,9 +193,7 @@ export function createDeployConfig() {
 																		};
 																		// We now have the deploy reloaded data to insert. 
 																		// Append it to the current settings.json data, and write it to file.
-																		
 																		settingsData['deploy.reloaded'] = deployReloadedData;
-																		//settingsData.push('deploy.reloaded: '+ deployReloadedData);
 																		fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
 																		vscode.window.showInformationMessage("Server data set.");
 																	}
@@ -213,8 +211,6 @@ export function createDeployConfig() {
 					}
 				});
 			} 
-
 		});
 	}
-
 }
