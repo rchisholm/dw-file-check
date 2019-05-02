@@ -36,12 +36,12 @@
 				"title": "Save File"
 			},
 			{
-			    "command": "extension.dwCheckFileStatus",
-			    "title": "Checkout Status..."
+				"command": "extension.dwCheckFileStatus",
+				"title": "Checkout Status..."
 			},
 			{
-			    "command": "extension.dwOpenFileOptions",
-			    "title": "DW File Options..."
+				"command": "extension.dwOpenFileOptions",
+				"title": "DW File Options..."
 			}
 		],
 		"menus": {
@@ -75,6 +75,7 @@
 	"dependencies": {
 		"event-stream": "^4.0.1",
 		"fs": "0.0.1-security",
+		"strip-json-comments": "^3.0.1",
 		"username": "^4.1.0"
 	}
 }

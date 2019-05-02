@@ -11,6 +11,12 @@ import * as utils from './dw-utils';
  * @param context vscode extension context
  */
 export function onStart(context: vscode.ExtensionContext) {
+
+	//if there is no deploy config, create one
+	if(!utils.deployConfigExists()) {
+		utils.createDeployConfig();
+	}
+
     status.updateWorkspaceStatus(context);
 }
 
@@ -317,39 +323,39 @@ export function checkFileStatus(context: vscode.ExtensionContext, fileOrFolder: 
  */
 export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: vscode.Uri){
 	//vscode.window.showInformationMessage('File: ' + fileOrFolder.fsPath);
-        if (utils.isFolder(fileOrFolder.fsPath)) {
-            vscode.window.showWarningMessage("Directories have no status. Please select an individual file.");
-        } else {
-            //open the clicked file, then show quickpick list
-            vscode.workspace.openTextDocument(fileOrFolder)
-            .then((doc:vscode.TextDocument) => {
-                vscode.window.showTextDocument(doc)
-                .then(() => {
-                    const QUICK_PICKS = [
-                        '$(arrow-down) Pull File',
-                        '$(arrow-up) Push File',
-                        '$(check) Check Out',
-                        '$(lock) Check In'
-                    ];
+	if (utils.isFolder(fileOrFolder.fsPath)) {
+		vscode.window.showWarningMessage("Directories have no status. Please select an individual file.");
+	} else {
+		//open the clicked file, then show quickpick list
+		vscode.workspace.openTextDocument(fileOrFolder)
+		.then((doc:vscode.TextDocument) => {
+			vscode.window.showTextDocument(doc)
+			.then(() => {
+				const QUICK_PICKS = [
+					'$(arrow-down) Pull File',
+					'$(arrow-up) Push File',
+					'$(check) Check Out',
+					'$(lock) Check In'
+				];
 
-                    //vscode.window.showQuickPick(QUICK_PICKS);
-                    vscode.window.showQuickPick(QUICK_PICKS).then((choice) => {
-                        switch(choice){
-                            case '$(arrow-down) Pull File':
-                            vscode.commands.executeCommand('extension.dwPullCurrentFile');
-                            break;
-                            case '$(arrow-up) Push File':
-                            vscode.commands.executeCommand('extension.dwPushCurrentFile');
-                            break;
-                            case '$(check) Check Out':
-                            vscode.commands.executeCommand('extension.dwCheckOutCurrentFile');
-                            break;
-                            case '$(lock) Check In':
-                            vscode.commands.executeCommand('extension.dwCheckInCurrentFile');
-                            break;
-                        }
-                    });
-                });
-            });
-        }
+				//vscode.window.showQuickPick(QUICK_PICKS);
+				vscode.window.showQuickPick(QUICK_PICKS).then((choice) => {
+					switch(choice){
+						case '$(arrow-down) Pull File':
+						vscode.commands.executeCommand('extension.dwPullCurrentFile');
+						break;
+						case '$(arrow-up) Push File':
+						vscode.commands.executeCommand('extension.dwPushCurrentFile');
+						break;
+						case '$(check) Check Out':
+						vscode.commands.executeCommand('extension.dwCheckOutCurrentFile');
+						break;
+						case '$(lock) Check In':
+						vscode.commands.executeCommand('extension.dwCheckInCurrentFile');
+						break;
+					}
+				});
+			});
+		});
+	}
 }
