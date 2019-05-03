@@ -73,7 +73,7 @@ export function isFolder(path: string) {
  * @param path fs path of the file
  */
 export function getFileName(path: string) {
-	let pathParts = path.split('\\');
+	let pathParts = path.split(getSlash());
 	return pathParts[pathParts.length-1];
 }
 
@@ -91,8 +91,8 @@ export function deployConfigExists(): boolean {
 		vscode.workspace.workspaceFolders.forEach(folder => {
 			//console.error(folder.uri.fsPath);
 			//console.error("folder: " + folder.uri.fsPath);
-			if(fs.existsSync(folder.uri.fsPath + "\\.vscode\\settings.json")) {
-				let settingsPath = folder.uri.fsPath + "\\.vscode\\settings.json";
+			if(fs.existsSync(folder.uri.fsPath + cPath("/.vscode/settings.json"))) {
+				let settingsPath = folder.uri.fsPath + cPath("/.vscode/settings.json");
 				let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
 				//console.log("settings data:");
 				//console.log(settingsData);
@@ -124,18 +124,18 @@ export function createDeployConfig() {
 		vscode.workspace.workspaceFolders.forEach(folder => {
 			//console.error(folder.uri.fsPath);
 			console.error("folder: " + folder.uri.fsPath);
-			if(!fs.existsSync(folder.uri.fsPath + "\\.vscode")){
+			if(!fs.existsSync(folder.uri.fsPath + cPath("/.vscode"))){
 				//.vscode does not exist; create it
 				
-				fs.mkdirSync(folder.uri.fsPath + "\\.vscode");
+				fs.mkdirSync(folder.uri.fsPath + cPath("/.vscode"));
 			}
 
-			if(!fs.existsSync(folder.uri.fsPath + "\\.vscode\\settings.json")) {
+			if(!fs.existsSync(folder.uri.fsPath + cPath("/.vscode/settings.json"))) {
 				//settings.json does not exist; create it
-				fs.writeFileSync(folder.uri.fsPath + "\\.vscode\\settings.json", "{}"); 
+				fs.writeFileSync(folder.uri.fsPath + cPath("/.vscode/settings.json"), "{}"); 
 			}
 			
-			let settingsPath = folder.uri.fsPath + "\\.vscode\\settings.json";
+			let settingsPath = folder.uri.fsPath + cPath("/.vscode/settings.json");
 			let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
 			if(!settingsData['deploy.reloaded']){
 				//no deploy reloaded data ; add some
@@ -201,4 +201,20 @@ export function createDeployConfig() {
 			} 
 		});
 	}
+}
+
+/**
+ * returns slash for unix, backslash for windows
+ */
+export function getSlash(): string {
+	const isWin = process.platform === "win32";
+	return isWin ? "\\" : "/";
+}
+
+/**
+ * cleans a path so it is cross-platform
+ * @param input the path to clean
+ */
+export function cPath(input: string) : string {
+	return input.replace("/", getSlash());
 }
