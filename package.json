@@ -55,7 +55,16 @@
 					"group": "dw-file-check"
 				}
 			]
-		}
+		},
+		"viewsContainers": {
+			"activitybar": [
+			  {
+				"id": "file-status-explorer",
+				"title": "File Status Explorer",
+				"icon": "media/dw2.png"
+			  }
+			]
+		  }
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
