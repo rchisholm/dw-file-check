@@ -1,65 +1,25 @@
-# dw-file-check README
-
-This is the README for your extension "dw-file-check". After writing up a brief description, we recommend including the following sections.
+# dw-file-check
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Using mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode-deploy-reloaded</a>, imitates the behavior of Adobe Dreamweaver's file check-in/check-out system, including push/pull to server. 
 
-For example if there is an image subfolder under your extension project workspace:
+Perform the operations "check in", "check out", "push", and "pull" on current file via commands and buttons in the action bar. 
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Perform the operations "Check File Status..." and "DW File Options..." on right-clicking in the file explorer to see that file's status (checked out by username, checked in, etc) and perform the basic commands on the selected file.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode-deploy-reloaded</a>
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- When right-clicking a binary file in the file explorer and choosing "DW File Options..." returns an exception.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Initial release of dw-file-check
 
 -----------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
