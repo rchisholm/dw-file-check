@@ -38,13 +38,11 @@ export function removeReadOnly(path:string){
  * create ".LCK" file with current user as owner
  * @param path fs path of the file
  */
-export function createLockFile(path: string){
+export function createLockFile(path: string, context: vscode.ExtensionContext){
 	let lockFilePath = path + ".LCK";
-	username().then(name => {
-		fs.writeFile(lockFilePath, name.toLowerCase() + "||" + name.toLowerCase() + "@marian.org", function (err) {
-			if (err) { throw err; }
-			//console.log('.LCK file saved!');
-		});
+	fs.writeFile(lockFilePath, getUserName(context) + "||" + getUserName(context) + "@marian.org", function (err) {
+		if (err) { throw err; }
+		//console.log('.LCK file saved!');
 	});
 }
 
@@ -217,4 +215,14 @@ export function getSlash(): string {
  */
 export function cPath(input: string) : string {
 	return input.replace("/", getSlash());
+}
+
+export function setUsername(context: vscode.ExtensionContext) {
+	username().then(name => {
+		context.workspaceState.update("username", name.toLowerCase());
+	});
+}
+
+export function getUserName(context: vscode.ExtensionContext): string {
+	return context.workspaceState.get("username") as string;
 }

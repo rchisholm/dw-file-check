@@ -54,17 +54,38 @@
 					"command": "extension.dwOpenFileOptions",
 					"group": "dw-file-check"
 				}
+			],
+			"view/item/context": [
+				{
+					"command": "extension.dwCheckFileStatus",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check"
+				},
+				{
+					"command": "extension.dwOpenFileOptions",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check"
+				}
 			]
 		},
 		"viewsContainers": {
 			"activitybar": [
 			  {
-				"id": "file-status-explorer",
+				"id": "dw-file-status",
 				"title": "File Status Explorer",
 				"icon": "media/dw2.png"
 			  }
 			]
-		  }
+		},
+		"views": {
+			"dw-file-status": [
+				{
+					"id": "file-status-explorer",
+					"name": "File Status"
+				}
+			]
+
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import * as dw from './dw-functions';
 import * as commands from './dw-commands';
 import * as buttons from './dw-buttons';
+import { FileStatusProvider } from './dw-file-status-provider';
 
 /**
  * this method is called when your extension is activated
@@ -24,8 +25,9 @@ export function activate(context: vscode.ExtensionContext) {
 		//console.log("deploy.reloaded found!");
 		//vscode.window.showInformationMessage("Deploy extenson loaded.");
 		dw.onStart(context);
-		buttons.addDwButtons(context);
 		commands.registerDwCommands(context);
+		buttons.addDwButtons(context);
+		vscode.window.registerTreeDataProvider("file-status-explorer", new FileStatusProvider(vscode.workspace.rootPath));
 	}
 }
 
