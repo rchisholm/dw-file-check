@@ -22,6 +22,6 @@ mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode
 
 ### 0.0.1
 
-Initial release of dw-file-check
+In development
 
 -----------------------------------------------------------------------------------------------------------
