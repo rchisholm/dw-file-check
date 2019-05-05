@@ -74,7 +74,7 @@ export function startPushCurrentFile(context: vscode.ExtensionContext) {
             }else if(currentFileStatus === "locked"){
                 // file is locked
                 vscode.window.showErrorMessage(fileName + " is locked. Please check file out to push.");
-            }else if(currentFileStatus === "unlocked"){
+            }else{
                 // file is unlocked
                 pushCurrentFile();
             }
@@ -136,7 +136,7 @@ export function checkInFile(context: vscode.ExtensionContext, path: string){
 		//file is locked
 		vscode.window.showWarningMessage(fileName + " is locked. Already checked in.");
 		//do nothing
-	}else if(currentFileStatus === "unlocked"){
+	}else{
 		//file is unlocked
 		//vscode.window.showInformationMessage("File is unlocked.");
 		finishCheckIn(context, path);
@@ -198,7 +198,7 @@ export function checkOutFile(context: vscode.ExtensionContext, path: string) {
 				}
 			);
 		}
-	}else if(currentFileStatus === "locked" || currentFileStatus === "unlocked"){
+	}else{
 		//file is locked or unlocked
 		finishCheckOut(context, path);
 	}
@@ -263,7 +263,7 @@ export function startSaveFile(context: vscode.ExtensionContext) {
         }else if(currentFileStatus === "locked"){
             // file is locked
             vscode.window.showErrorMessage(fileName + " is locked. Please check file out to save.");
-        }else if(currentFileStatus === "unlocked"){
+        }else{
             // file is unlocked
             nativeSaveFile();
         }
