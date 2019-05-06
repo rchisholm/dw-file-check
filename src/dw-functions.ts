@@ -12,17 +12,21 @@ import * as utils from './dw-utils';
  */
 export function onStart(context: vscode.ExtensionContext) {
 
-	//if there is no deploy config, create one
+	// if there is no deploy config, create one
 	if(!utils.deployConfigExists()) {
 		utils.createDeployConfig();
 	}
 	
-	//set username/email in workspaceState
+	// set username/email in workspaceState
 	utils.setUsername(context);
 	utils.setEmail(context);
 
-	//updates status of all workspace files
+	// exclude DW meta files
+	utils.setFilesExclude();
+
+	// updates status of all workspace files
 	status.updateWorkspaceStatus(context);
+
 }
 
 /**

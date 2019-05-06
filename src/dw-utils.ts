@@ -107,7 +107,7 @@ export function deployConfigExists(): boolean {
  * prompt user for options to set deploy.reloaded config
  */
 export function createDeployConfig() {
-	console.log("running createDeploymentConfig()...");
+	//console.log("running createDeploymentConfig()...");
 	let targetType: string;
 	let targetName: string = "server";
 	let targetDescription: string = "live server";
@@ -121,7 +121,7 @@ export function createDeployConfig() {
 	if(vscode.workspace.workspaceFolders){
 		vscode.workspace.workspaceFolders.forEach(folder => {
 			//console.error(folder.uri.fsPath);
-			console.error("folder: " + folder.uri.fsPath);
+			//console.error("folder: " + folder.uri.fsPath);
 			if(!fs.existsSync(folder.uri.fsPath + cPath("/.vscode"))){
 				//.vscode does not exist; create it
 				
@@ -265,4 +265,40 @@ export function setEmail(context: vscode.ExtensionContext) {
  */
 export function getEmail(context: vscode.ExtensionContext): string {
 	return context.workspaceState.get("email") as string;
+}
+
+/**
+ * set files.exclude property in local 
+ */
+export function setFilesExclude() {
+	if(vscode.workspace.workspaceFolders){
+		vscode.workspace.workspaceFolders.forEach(folder => {
+			//console.error(folder.uri.fsPath);
+			//console.error("folder: " + folder.uri.fsPath);
+			if(!fs.existsSync(folder.uri.fsPath + cPath("/.vscode"))){
+				//.vscode does not exist; create it
+				
+				fs.mkdirSync(folder.uri.fsPath + cPath("/.vscode"));
+			}
+
+			if(!fs.existsSync(folder.uri.fsPath + cPath("/.vscode/settings.json"))) {
+				//settings.json does not exist; create it
+				fs.writeFileSync(folder.uri.fsPath + cPath("/.vscode/settings.json"), "{}"); 
+			}
+
+			let settingsPath = folder.uri.fsPath + cPath("/.vscode/settings.json");
+			let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
+			//let excludeSettings = { "**/*.LCK": true, "**/dwsync.xml": true };
+			//settingsData['files.exclude'] = excludeSettings;
+			if(!settingsData['files.exclude']) {
+				settingsData['files.exclude'] = {};
+			}
+			settingsData['files.exclude']["**/*.LCK"] = true;
+			settingsData['files.exclude']["**/dwsync.xml"] = true;
+			settingsData['files.exclude']["**/_notes"] = true;
+			// may need to add other files
+
+			fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
+		});
+	}
 }
