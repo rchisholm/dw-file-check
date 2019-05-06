@@ -244,48 +244,6 @@ export function finishCheckOut(context: vscode.ExtensionContext, path: string){
 }
 
 /**
- * try to save current file (not used)
- * @param context vscode extension context
- */
-export function startSaveFile(context: vscode.ExtensionContext) {
-    // if locked OR checked out by someone else: disallow; warn user they should check the file out.
-    // else: allow
-    if(vscode.window.activeTextEditor){
-        let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-        //vscode.window.showInformationMessage(currentFilePath);
-		let currentFileStatus = status.getFileStatus(context, currentFilePath);
-		let fileName = utils.getFileName(currentFilePath);
-
-        if(currentFileStatus === "out") {
-		let currentFileOwner = status.getFileOwner(context, currentFilePath);
-			if(currentFileOwner === utils.getUserName(context)){
-				// file is checked out by you.
-				nativeSaveFile();
-			}else{
-				// file is checked out by someone else
-				vscode.window.showErrorMessage(fileName + " is checked out by " + currentFileOwner + ". Please check file out to save.");
-			}
-        }else if(currentFileStatus === "locked"){
-            // file is locked
-            vscode.window.showErrorMessage(fileName + " is locked. Please check file out to save.");
-        }else{
-            // file is unlocked
-            nativeSaveFile();
-        }
-    } else {
-        vscode.window.showErrorMessage("No open file.");
-    }
-}
-
-/**
- * save the file (not used)
- */
-export function nativeSaveFile(){
-	//save the file
-	vscode.window.showInformationMessage("(save file)");
-}
-
-/**
  * displays the file status and owner of the right-clicked file
  * @param context vscode extension context
  * @param fileOrFolder uri of the right-clicked file
@@ -356,6 +314,9 @@ export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: 
 					}
 				});
 			});
+		},
+		() => {
+			vscode.window.showErrorMessage("DW File Operations not supported for non-text files.");
 		});
 	}
 }

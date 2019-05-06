@@ -32,10 +32,6 @@
 				"title": "Pull Current File"
 			},
 			{
-				"command": "extension.dwSaveCurrentFile",
-				"title": "Save File"
-			},
-			{
 				"command": "extension.dwCheckFileStatus",
 				"title": "Checkout Status..."
 			},

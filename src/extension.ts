@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 				dw.checkInFile(context, currentFilePath);
 
 			} else {
-				vscode.window.showInformationMessage("No open file.");
+				vscode.window.showInformationMessage("No active text editor.");
 			}
 		});
 	
@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
 				dw.checkOutFile(context, currentFilePath);
 			} else {
-				vscode.window.showErrorMessage("No open file.");
+				vscode.window.showErrorMessage("No active text editor.");
 			}
 		});
 	
@@ -51,10 +51,6 @@ export function activate(context: vscode.ExtensionContext) {
 	
 		let dwPullCurrentFile = vscode.commands.registerCommand('extension.dwPullCurrentFile', () => {
 			dw.pullCurrentFile();
-		});
-	
-		let dwSaveFile = vscode.commands.registerCommand('extension.dwSaveFile', () => {
-			dw.startSaveFile(context);
 		});
 	
 		let dwCheckFileStatus = vscode.commands.registerCommand('extension.dwCheckFileStatus', (fileOrFolder: vscode.Uri) => {
@@ -88,7 +84,6 @@ export function activate(context: vscode.ExtensionContext) {
 			dwCheckOutCurrentFile, 
 			dwPushCurrentFile, 
 			dwPullCurrentFile, 
-			dwSaveFile,
 			dwCheckFileStatus,
 			dwOpenFileOptions,
 			dwRefreshTree,

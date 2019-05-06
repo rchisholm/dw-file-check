@@ -2,7 +2,7 @@
 
 ## Features
 
-Using mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode-deploy-reloaded</a>, imitates the behavior of Adobe Dreamweaver's file check-in/check-out system, including push/pull to server. 
+Using mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode-deploy-reloaded</a>, imitates the behavior of Adobe Dreamweaver's file check-in/check-out system, including push/pull to server, to allow teams using Dreamweaver to transition to vscode.
 
 Perform the operations "check in", "check out", "push", and "pull" on current file via commands and buttons in the action bar. 
 
@@ -28,13 +28,12 @@ mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode
 
 ## Known Issues
 
-- When right-clicking a binary file in the file explorer and choosing "DW File Options..." returns an exception.
-- TODO: on rename file, update workspace state status: old file name -> status unlocked, user ""; new file name -> status & owner = old name status & owner
+Does not support operations for non-text files (binary, image).
+
+TODO: on rename file, update workspace state status: old file name -> status unlocked, user ""; new file name -> status & owner = old name status & owner
 
 ## Release Notes
 
 ### 0.0.1
 
 In development
-
------------------------------------------------------------------------------------------------------------
