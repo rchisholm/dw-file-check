@@ -41,7 +41,19 @@
 			},
 			{
 				"command": "extension.dwOpenFileOptions",
-				"title": "DW File Options..."
+				"title": "DW File Operations..."
+			},
+			{
+				"command": "extension.dwTreeCheckFileStatus",
+				"title": "Checkout Status..."
+			},
+			{
+				"command": "extension.dwTreeOpenFileOptions",
+				"title": "DW File Operations..."
+			},
+			{
+				"command": "extension.dwRefreshTree",
+				"title": "Refresh DW File Status Tree"
 			}
 		],
 		"menus": {
@@ -57,12 +69,12 @@
 			],
 			"view/item/context": [
 				{
-					"command": "extension.dwCheckFileStatus",
+					"command": "extension.dwTreeCheckFileStatus",
 					"when": "view == file-status-explorer",
 					"group": "dw-file-check"
 				},
 				{
-					"command": "extension.dwOpenFileOptions",
+					"command": "extension.dwTreeOpenFileOptions",
 					"when": "view == file-status-explorer",
 					"group": "dw-file-check"
 				}

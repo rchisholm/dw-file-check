@@ -30,17 +30,16 @@ export function updateFileStatusByURI(context: vscode.ExtensionContext, uri: vsc
 		vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
 			let ownerName = file.getText().split("||")[0];
 			let filePath = lockFileUri.fsPath.split(".LCK")[0];
-			//console.log(filePath);
 			context.workspaceState.update("status:" + filePath, "out");
 			context.workspaceState.update("owner:" + filePath, ownerName);
-			console.log(getFileName(filePath) + " checked out by " + ownerName);
+			//console.log(getFileName(filePath) + " checked out by " + ownerName);
 		},() =>{
 			if(isReadOnly(uri.fsPath)){
 				context.workspaceState.update("status:" + uri.fsPath, "locked");
-				console.log(getFileName(uri.fsPath) + " is locked.");
+				//console.log(getFileName(uri.fsPath) + " is locked.");
 			} else {
 				context.workspaceState.update("status:" + uri.fsPath, "unlocked");
-				console.log(getFileName(uri.fsPath) + " is unlocked.");
+				//console.log(getFileName(uri.fsPath) + " is unlocked.");
 			}
 		});
 	}
@@ -57,17 +56,16 @@ export function updateFileStatusByPath(context: vscode.ExtensionContext, path: s
 		vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
 			let ownerName = file.getText().split("||")[0];
 			let filePath = lockFileUri.fsPath.split(".LCK")[0];
-			//console.log(filePath);
 			context.workspaceState.update("status:" + filePath, "out");
 			context.workspaceState.update("owner:" + filePath, ownerName);
-			console.log(getFileName(filePath) + " checked out by " + ownerName);
+			//console.log(getFileName(filePath) + " checked out by " + ownerName);
 		},()=> {
 			if(isReadOnly(path)){
 				context.workspaceState.update("status:" + path, "locked");
-				console.log(getFileName(path) + " is locked.");
+				//console.log(getFileName(path) + " is locked.");
 			} else {
 				context.workspaceState.update("status:" + path, "unlocked");
-				console.log(getFileName(path) + " is unlocked.");
+				//console.log(getFileName(path) + " is unlocked.");
 			}
 		});
 	}
@@ -100,13 +98,12 @@ export function getFileOwnerByPath(path: string): string{
 	let lockFileUri = vscode.Uri.file(path + ".LCK");
 	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
 		let ownerName = file.getText().split("||")[0];
-		//console.log(filePath);
 		return ownerName;
 	},()=> {
 		//rejected
 		return "";
 	});
-	console.log("error - no owner returned for " + path);
+	//console.log("error - no owner returned for " + getFileName(path));
 	return "";
 }
 
@@ -115,9 +112,9 @@ export function getFileOwnerByPath(path: string): string{
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function getFileStatus(context: vscode.ExtensionContext, path: string){
+export function getFileStatus(context: vscode.ExtensionContext, path: string): string{
 	//updateFileStatusByPath(context, path);
-	return context.workspaceState.get("status:" + path);
+	return context.workspaceState.get("status:" + path) as string;
 	//return getFileStatusByPath(path);
 }
 
@@ -126,9 +123,9 @@ export function getFileStatus(context: vscode.ExtensionContext, path: string){
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function getFileOwner(context: vscode.ExtensionContext, path: string){
+export function getFileOwner(context: vscode.ExtensionContext, path: string): string{
 	//updateFileStatusByPath(context, path);
-	return context.workspaceState.get("owner:" + path);
+	return context.workspaceState.get("owner:" + path) as string;
 	//return getFileOwnerByPath(path);
 }
 

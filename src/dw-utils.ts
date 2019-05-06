@@ -67,6 +67,30 @@ export function isFolder(path: string) {
 }
 
 /**
+ * returns true file is excluded in settings
+ * @param path fs path of the file
+ */
+export function isExcludedFile(path: string) {
+	// let excludeSettings = vscode.workspace.getConfiguration().get("files.exclude");
+	// if(excludeSettings) {
+	// 	console.error(excludeSettings);
+	// }
+	let excludePatterns: string[] = [];
+	excludePatterns.push(".LCK");
+	excludePatterns.push("dwsync.xml");
+	excludePatterns.push("_notes");
+	// TODO: need to add all files.exclude patterns here, and not just use "endsWith" but match the pattern
+
+	excludePatterns.forEach(pattern => {
+		if(path.endsWith(pattern)) {
+			return true;
+		}
+	});
+	return false;
+
+}
+
+/**
  * get name of a file from the path
  * @param path fs path of the file
  */

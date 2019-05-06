@@ -173,7 +173,7 @@ export function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	utils.setReadOnly(path);
 	
 	vscode.window.showInformationMessage(fileName + " checked in.");
-	return null;
+	vscode.commands.executeCommand("extension.dwRefreshTree");
 }
 
 /**
@@ -240,7 +240,7 @@ export function finishCheckOut(context: vscode.ExtensionContext, path: string){
 	utils.removeReadOnly(path);
 
 	vscode.window.showInformationMessage(fileName + " checked out.");
-	return null;
+	vscode.commands.executeCommand("extension.dwRefreshTree");
 }
 
 /**
@@ -312,6 +312,7 @@ export function checkFileStatus(context: vscode.ExtensionContext, fileOrFolder: 
 				status.updateFileStatusByPath(context, fileOrFolder.fsPath);
 			break;
 		}
+		vscode.commands.executeCommand("extension.dwRefreshTree");
 	}
 }
 

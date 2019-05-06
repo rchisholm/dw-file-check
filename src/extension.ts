@@ -3,9 +3,8 @@
  */
 import * as vscode from 'vscode';
 import * as dw from './dw-functions';
-import * as commands from './dw-commands';
 import * as buttons from './dw-buttons';
-import { FileStatusProvider } from './dw-file-status-provider';
+import { FileStatusProvider, DwFile } from './dw-file-status-provider';
 
 /**
  * this method is called when your extension is activated
@@ -25,9 +24,78 @@ export function activate(context: vscode.ExtensionContext) {
 		//console.log("deploy.reloaded found!");
 		//vscode.window.showInformationMessage("Deploy extenson loaded.");
 		dw.onStart(context);
-		commands.registerDwCommands(context);
+
+		let dwCheckInCurrentFile = vscode.commands.registerCommand('extension.dwCheckInCurrentFile', () => {
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;	
+				dw.checkInFile(context, currentFilePath);
+
+			} else {
+				vscode.window.showInformationMessage("No open file.");
+			}
+		});
+	
+		let dwCheckOutCurrentFile = vscode.commands.registerCommand('extension.dwCheckOutCurrentFile', () => {	
+			if(vscode.window.activeTextEditor){
+				let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				dw.checkOutFile(context, currentFilePath);
+			} else {
+				vscode.window.showErrorMessage("No open file.");
+			}
+		});
+	
+		let dwPushCurrentFile = vscode.commands.registerCommand('extension.dwPushCurrentFile', () => {
+			dw.startPushCurrentFile(context);
+	
+		});
+	
+		let dwPullCurrentFile = vscode.commands.registerCommand('extension.dwPullCurrentFile', () => {
+			dw.pullCurrentFile();
+		});
+	
+		let dwSaveFile = vscode.commands.registerCommand('extension.dwSaveFile', () => {
+			dw.startSaveFile(context);
+		});
+	
+		let dwCheckFileStatus = vscode.commands.registerCommand('extension.dwCheckFileStatus', (fileOrFolder: vscode.Uri) => {
+			dw.checkFileStatus(context, fileOrFolder);
+		});
+	
+		let dwOpenFileOptions = vscode.commands.registerCommand('extension.dwOpenFileOptions', (fileOrFolder: vscode.Uri) => {
+			dw.openFileOptions(context, fileOrFolder);
+		});
+
+		let dwRefreshTree = vscode.commands.registerCommand('extension.dwRefreshTree', () => {
+			fileStatusProvider.refresh();
+		});
+	
+		let dwTreeCheckFileStatus = vscode.commands.registerCommand('extension.dwTreeCheckFileStatus', (node: DwFile) => {
+			dw.checkFileStatus(context, vscode.Uri.file(node.filePath));
+		});
+	
+		let dwTreeOpenFileOptions = vscode.commands.registerCommand('extension.dwTreeOpenFileOptions', (node: DwFile) => {
+			dw.openFileOptions(context, vscode.Uri.file(node.filePath));
+		});
+	
+		// add the commands
+		context.subscriptions.push(
+			dwCheckInCurrentFile, 
+			dwCheckOutCurrentFile, 
+			dwPushCurrentFile, 
+			dwPullCurrentFile, 
+			dwSaveFile,
+			dwCheckFileStatus,
+			dwOpenFileOptions,
+			dwRefreshTree,
+			dwTreeCheckFileStatus,
+			dwTreeOpenFileOptions
+		);
+	
+		// add the buttons
 		buttons.addDwButtons(context);
-		vscode.window.registerTreeDataProvider("file-status-explorer", new FileStatusProvider(vscode.workspace.rootPath));
+
+		const fileStatusProvider = new FileStatusProvider(context, vscode.workspace.rootPath);
+		vscode.window.registerTreeDataProvider("file-status-explorer", fileStatusProvider);
 	}
 }
 
