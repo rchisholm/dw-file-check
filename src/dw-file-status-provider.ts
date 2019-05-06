@@ -46,37 +46,39 @@ export class FileStatusProvider implements vscode.TreeDataProvider<DwFile> {
         let dwFiles: DwFile[] = [];
         if(path) {
             let filePaths = fs.readdirSync(path);
+
             filePaths.forEach(filePath => {
                 filePath = path + utils.getSlash() + filePath;
-                if(!utils.isExcludedFile(filePath)) {
-                    if(utils.isFolder(filePath)){
-                        dwFiles.push(new DwFile(
-                            this.context,
-                            utils.getFileName(filePath),
-                            vscode.Uri.file(filePath),
-                            vscode.TreeItemCollapsibleState.Collapsed,
-                            dwStatus.getFileStatus(this.context, filePath),
-                            dwStatus.getFileOwner(this.context, filePath),
-                            filePath
-                        ));
-                    } else {
-                        dwFiles.push(new DwFile(
-                            this.context,
-                            utils.getFileName(filePath),
-                            vscode.Uri.file(filePath),
-                            vscode.TreeItemCollapsibleState.None,
-                            dwStatus.getFileStatus(this.context, filePath),
-                            dwStatus.getFileOwner(this.context, filePath),
-                            filePath,
-                            {
-                                command: 'vscode.open',
-                                title: 'Open File...',
-                                arguments: [vscode.Uri.file(filePath)]
-                            }
-                        ));
-                    }
+                if(utils.isFolder(filePath) && !utils.isExcludedFile(filePath)) {
+                    dwFiles.push(new DwFile(
+                        this.context,
+                        utils.getFileName(filePath),
+                        vscode.Uri.file(filePath),
+                        vscode.TreeItemCollapsibleState.Collapsed,
+                        dwStatus.getFileStatus(this.context, filePath),
+                        dwStatus.getFileOwner(this.context, filePath),
+                        filePath
+                    ));
+                }
+            });
 
-                    
+            filePaths.forEach(filePath => {
+                filePath = path + utils.getSlash() + filePath;
+                if(!utils.isFolder(filePath) && !utils.isExcludedFile(filePath)) {
+                    dwFiles.push(new DwFile(
+                        this.context,
+                        utils.getFileName(filePath),
+                        vscode.Uri.file(filePath),
+                        vscode.TreeItemCollapsibleState.None,
+                        dwStatus.getFileStatus(this.context, filePath),
+                        dwStatus.getFileOwner(this.context, filePath),
+                        filePath,
+                        {
+                            command: 'vscode.open',
+                            title: 'Open File...',
+                            arguments: [vscode.Uri.file(filePath)]
+                        }
+                    ));
                 }
             });
         } 

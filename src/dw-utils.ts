@@ -71,7 +71,10 @@ export function isFolder(path: string) {
  * @param path fs path of the file
  */
 export function isExcludedFile(path: string): boolean {
-	return path.endsWith(".LCK") || path.endsWith("dwsync.xml") || path.endsWith("_notes");
+	return path.endsWith(".LCK") 
+		|| path.endsWith("dwsync.xml") 
+		|| path.endsWith("_notes")
+		|| path.endsWith(".git");
 
 	// let excludeSettings = vscode.workspace.getConfiguration().get("files.exclude");
 	// if(excludeSettings) {
