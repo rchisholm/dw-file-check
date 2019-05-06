@@ -15,6 +15,7 @@ On opening a workspace, checks for deploy-reloaded configuration in settings.jso
 In settings.json, add these settings:
 
 "dw.username": "userName",
+
 "dw.email": "userEmail@email.com"
 
 This should preferably be set in the user level settings rather than the workspace level settings.
@@ -26,6 +27,8 @@ mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode
 ## Known Issues
 
 - When right-clicking a binary file in the file explorer and choosing "DW File Options..." returns an exception.
+- TODO: automatically exclude .LCK files and dwsync.xml files 
+- TODO: on rename file, update workspace state status: old file name -> status unlocked, user ""; new file name -> status & owner = old name status & owner
 
 ## Release Notes
 
