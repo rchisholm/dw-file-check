@@ -10,6 +10,15 @@ Perform the operations "Check File Status..." and "DW File Options..." on right-
 
 On opening a workspace, checks for deploy-reloaded configuration in settings.json, and if they are not present, prompts the user for necessary info to create that configuration (similar to the "server" settings GUI in Dreamweaver)
 
+## Configuration options
+
+In settings.json, add these settings:
+
+"dw.username": "userName",
+"dw.email": "userEmail@email.com"
+
+This should preferably be set in the user level settings rather than the workspace level settings.
+
 ## Requirements
 
 mkloubert's <a href="https://github.com/mkloubert/vscode-deploy-reloaded">vscode-deploy-reloaded</a>

@@ -40,7 +40,7 @@ export function removeReadOnly(path:string){
  */
 export function createLockFile(path: string, context: vscode.ExtensionContext){
 	let lockFilePath = path + ".LCK";
-	fs.writeFile(lockFilePath, getUserName(context) + "||" + getUserName(context) + "@marian.org", function (err) {
+	fs.writeFile(lockFilePath, getUserName(context) + "||" + getEmail(context), function (err) {
 		if (err) { throw err; }
 		//console.log('.LCK file saved!');
 	});
@@ -217,12 +217,52 @@ export function cPath(input: string) : string {
 	return input.replace("/", getSlash());
 }
 
+/**
+ * sets the username in workspace state to the value from settings.json.
+ * If no value is set, use a username value from OS login info.
+ * @param context vscode extension context
+ */
 export function setUsername(context: vscode.ExtensionContext) {
-	username().then(name => {
-		context.workspaceState.update("username", name.toLowerCase());
-	});
+	let settingsUsername = vscode.workspace.getConfiguration().get('dw.username') as string;
+	if(settingsUsername.length > 0 && settingsUsername !== 'undefined') {
+		context.workspaceState.update("username", settingsUsername);
+	} else {
+		username().then(name => {
+			context.workspaceState.update("username", name.toLowerCase());
+			vscode.workspace.getConfiguration().update("username", name.toLowerCase());
+		});
+	}
 }
 
+/**
+ * get username from workspace state
+ * @param context vscode extension context
+ */
 export function getUserName(context: vscode.ExtensionContext): string {
 	return context.workspaceState.get("username") as string;
+}
+
+/**
+ * sets the email in workspace state to the value from settings.json.
+ * If no value is set, use a username value from OS login info.
+ * @param context vscode extension context
+ */
+export function setEmail(context: vscode.ExtensionContext) {
+	let settingsEmail = vscode.workspace.getConfiguration().get('dw.email') as string;
+	if(settingsEmail.length > 0 && settingsEmail !== 'undefined') {
+		context.workspaceState.update("email", settingsEmail);
+	} else {
+		username().then(name => {
+			context.workspaceState.update("email", name.toLowerCase());
+			vscode.workspace.getConfiguration().update("email", name.toLowerCase());
+		});
+	}
+}
+
+/**
+ * get email from workspace state
+ * @param context vscode extension context
+ */
+export function getEmail(context: vscode.ExtensionContext): string {
+	return context.workspaceState.get("email") as string;
 }

@@ -85,6 +85,24 @@
 				}
 			]
 
+		},
+		"configuration": {
+			"type": "object",
+			"title": "DW User Configuration",
+			"properties": {
+				"dw.username": {
+					"type": "string",
+					"default": "",
+					"description": "Specifies the username for .LCK files",
+					"scope": "window"
+				},
+				"dw.email": {
+					"type": "string",
+					"default": "",
+					"description": "Specifies the user email for .LCK files",
+					"scope": "window"
+				}
+			}
 		}
 	},
 	"scripts": {

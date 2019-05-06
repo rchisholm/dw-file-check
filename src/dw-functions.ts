@@ -17,8 +17,9 @@ export function onStart(context: vscode.ExtensionContext) {
 		utils.createDeployConfig();
 	}
 	
-	//set username in workspaceState
+	//set username/email in workspaceState
 	utils.setUsername(context);
+	utils.setEmail(context);
 
 	//updates status of all workspace files
 	status.updateWorkspaceStatus(context);
