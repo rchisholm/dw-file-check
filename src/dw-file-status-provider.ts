@@ -47,33 +47,49 @@ export class FileStatusProvider implements vscode.TreeDataProvider<DwFile> {
         if(path) {
             let filePaths = fs.readdirSync(path);
             filePaths.forEach(filePath => {
-                //console.warn(file);
                 filePath = path + utils.getSlash() + filePath;
                 if(!utils.isExcludedFile(filePath)) {
-                    let collapse = utils.isFolder(filePath) ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
-                    //console.warn(file);
-                    dwFiles.push(new DwFile(
-                        this.context,
-                        utils.getFileName(filePath),
-                        vscode.Uri.file(filePath),
-                        collapse,
-                        //this.getDwFileIcon(this.context, filePath),
-                        //"media/dw2.png",
-                        dwStatus.getFileStatus(this.context, filePath),
-                        dwStatus.getFileOwner(this.context, filePath),
-                        filePath
-                    ));
+                    if(utils.isFolder(filePath)){
+                        dwFiles.push(new DwFile(
+                            this.context,
+                            utils.getFileName(filePath),
+                            vscode.Uri.file(filePath),
+                            vscode.TreeItemCollapsibleState.Collapsed,
+                            dwStatus.getFileStatus(this.context, filePath),
+                            dwStatus.getFileOwner(this.context, filePath),
+                            filePath
+                        ));
+                    } else {
+                        dwFiles.push(new DwFile(
+                            this.context,
+                            utils.getFileName(filePath),
+                            vscode.Uri.file(filePath),
+                            vscode.TreeItemCollapsibleState.None,
+                            dwStatus.getFileStatus(this.context, filePath),
+                            dwStatus.getFileOwner(this.context, filePath),
+                            filePath,
+                            {
+                                command: 'vscode.open',
+                                title: 'Open File...',
+                                arguments: [vscode.Uri.file(filePath)]
+                            }
+                        ));
+                    }
+
+                    
                 }
             });
         } 
-        //console.error("dwFiles:");
-        //console.log(dwFiles);
         return dwFiles;
     }
 
-    private pathExists(p: string): boolean {
+    /**
+     * returns true if the path exists
+     * @param p the path in question
+     */
+    private pathExists(path: string): boolean {
         try {
-            fs.accessSync(p);
+            fs.accessSync(path);
         } catch (err) {
             return false;
         }
@@ -128,7 +144,8 @@ export class DwFile extends vscode.TreeItem {
         //public iconPath: string,
         public status: string,
         public owner: string,
-        public filePath: string
+        public filePath: string,
+        public readonly command?: vscode.Command
     ) {
         super(label, collapsibleState);
     }
@@ -172,4 +189,5 @@ export class DwFile extends vscode.TreeItem {
 
         return path.join(__filename, '..', '..', 'media', icon);
     }
+
 }

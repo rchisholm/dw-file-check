@@ -77,6 +77,11 @@ export function activate(context: vscode.ExtensionContext) {
 			dw.openFileOptions(context, vscode.Uri.file(node.filePath));
 		});
 	
+		let dwTreeOpenFile = vscode.commands.registerCommand('extension.dwTreeOpenFile', (node: DwFile) => {
+			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
+			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(node.filePath));
+		});
+	
 		// add the commands
 		context.subscriptions.push(
 			dwCheckInCurrentFile, 
@@ -88,7 +93,8 @@ export function activate(context: vscode.ExtensionContext) {
 			dwOpenFileOptions,
 			dwRefreshTree,
 			dwTreeCheckFileStatus,
-			dwTreeOpenFileOptions
+			dwTreeOpenFileOptions,
+			dwTreeOpenFile
 		);
 	
 		// add the buttons

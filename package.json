@@ -54,6 +54,10 @@
 			{
 				"command": "extension.dwRefreshTree",
 				"title": "Refresh DW File Status Tree"
+			},
+			{
+				"command": "extension.dwTreeOpenFile",
+				"title": "Open File..."
 			}
 		],
 		"menus": {
@@ -68,6 +72,10 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "extension.dwTreeOpenFile",
+					"when": "view == file-status-explorer"
+				},
 				{
 					"command": "extension.dwTreeCheckFileStatus",
 					"when": "view == file-status-explorer",
@@ -85,7 +93,7 @@
 			  {
 				"id": "dw-file-status",
 				"title": "File Status Explorer",
-				"icon": "media/dw2.png"
+				"icon": "media/dw.png"
 			  }
 			]
 		},
