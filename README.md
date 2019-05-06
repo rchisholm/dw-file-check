@@ -8,9 +8,11 @@ Perform the operations "check in", "check out", "push", and "pull" on current fi
 
 Perform the operations "Check File Status..." and "DW File Options..." on right-clicking in the file explorer to see that file's status (checked out by username, checked in, etc) and perform the basic commands on the selected file.
 
-On opening a workspace, checks for deploy-reloaded configuration in settings.json, and if they are not present, prompts the user for necessary info to create that configuration (similar to the "server" settings GUI in Dreamweaver)
+On opening a workspace, checks for deploy-reloaded configuration in settings.json, and if they are not present, prompts the user for necessary info to create that configuration (similar to the "server" settings GUI in Dreamweaver).
 
-## Configuration options
+Provides a tree view of the directory structure and files (similar view to Dreamweaver).
+
+## Extension Settings
 
 In settings.json, add these settings:
 
