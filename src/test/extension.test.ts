@@ -46,22 +46,31 @@ suite("Extension Tests", function() {
         }
     });
 
-    // these 2 are async, and i can't get async tests or functions to work :(
+    test("file is checked out", async function() {
+        if(vscode.workspace.rootPath) {
+            let status = await dwStat.getFileStatusByPath(vscode.workspace.rootPath + "/checked-out.txt");
+            assert.equal(status, "out");
+        }else {
+            assert(false);
+        }
+    });
 
-    // test("file is checked out", function() {
-    //     if(vscode.workspace.rootPath) {
-    //         assert.equal(dwStat.getFileStatusByPath(vscode.workspace.rootPath + "/checked-out.txt"), "out");
-    //     }else {
-    //         assert(false);
-    //     }
-    // });
+    test("file is checked in", async function() {
+        if(vscode.workspace.rootPath) {
+            let status = await dwStat.getFileStatusByPath(vscode.workspace.rootPath + "/checked-in.txt");
+            assert.equal(status, "locked");
+        }else {
+            assert(false);
+        }
+    });
 
-    // test("file is checked in", function() {
-    //     if(vscode.workspace.rootPath) {
-    //         assert.equal(dwStat.getFileStatusByPath(vscode.workspace.rootPath + "/checked-in.txt"), "locked");
-    //     }else {
-    //         assert(false);
-    //     }
-    // });
+    test("file is owned by rchisholm", async function() {
+        if(vscode.workspace.rootPath) {
+            let owner = await dwStat.getFileOwnerByPath(vscode.workspace.rootPath + "/checked-out.txt");
+            assert.equal(owner, "rchisholm");
+        }else {
+            assert(false);
+        }
+    });
 
 });

@@ -72,39 +72,45 @@ export function updateFileStatusByPath(context: vscode.ExtensionContext, path: s
 }
 
 
-// /**
-//  * gets the status of a single file by fsPath
-//  * @param path fs path of the file
-//  */
-// export async function getFileStatusByPath(path: string): Promise<string> {
-// 	let lockFileUri = vscode.Uri.file(path + ".LCK");
-// 	await vscode.workspace.openTextDocument(lockFileUri).then(() =>{
-// 		return Promise.resolve("out");
-// 	},()=> {
-// 		if(isReadOnly(path)){
-// 			return Promise.resolve("locked");
-// 		} else {
-// 			return Promise.resolve("unlocked");
-// 		}
-// 	});
-// 	console.error("no status returned for " + getFileName(path));
-// }
+/**
+ * gets the status of a single file by fsPath
+ * @param path fs path of the file
+ */
+export async function getFileStatusByPath(path: string): Promise<string> {
+	let lockFileUri = vscode.Uri.file(path + ".LCK");
+	let status: string = "";
+	await vscode.workspace.openTextDocument(lockFileUri).then(() =>{
+		// return Promise.resolve("out");
+		status = "out";
+	},()=> {
+		if(isReadOnly(path)){
+			// return Promise.resolve("locked");
+			status = "locked";
+		} else {
+			// return Promise.resolve("unlocked");
+			status = "unlocked";
+		}
+	});
+	// console.error("no status returned for " + getFileName(path));
+	return Promise.resolve(status);
+}
 
-// /**
-//  * gets the owner of a single file by fsPath
-//  * @param path fs path of the file
-//  */
-// export async function getFileOwnerByPath(path: string): Promise<string>{
-// 	let lockFileUri = vscode.Uri.file(path + ".LCK");
-// 	await vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
-// 		let ownerName = file.getText().split("||")[0];
-// 		return Promise.resolve(ownerName);
-// 	},()=> {
-// 		//rejected
-// 		return Promise.resolve("");
-// 	});
-// 	console.error("no owner returned for " + getFileName(path));
-// }
+/**
+ * gets the owner of a single file by fsPath
+ * @param path fs path of the file
+ */
+export async function getFileOwnerByPath(path: string): Promise<string>{
+	let lockFileUri = vscode.Uri.file(path + ".LCK");
+	let ownerName: string = "";
+	await vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+		ownerName = file.getText().split("||")[0];
+	},()=> {
+		//rejected
+		ownerName = "";
+	});
+	// console.error("no owner returned for " + getFileName(path));
+	return Promise.resolve(ownerName);
+}
 
 /**
  * get file status from workspace state
