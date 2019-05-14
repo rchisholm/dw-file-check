@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "**/*.LCK": true,
+        "**/dwsync.xml": true,
+        "**/_notes": true
+    }
+}

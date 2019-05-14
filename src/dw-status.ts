@@ -71,41 +71,40 @@ export function updateFileStatusByPath(context: vscode.ExtensionContext, path: s
 	}
 }
 
-/**
- * gets the status of a single file by fsPath
- * @param path fs path of the file
- */
-export function getFileStatusByPath(path: string): string {
-	let lockFileUri = vscode.Uri.file(path + ".LCK");
-	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
-		return "out";
-	},()=> {
-		if(isReadOnly(path)){
-			return "locked";
-		} else {
-			return "unlocked";
-		}
-	});
-	console.log("error - no status returned for " + getFileName(path));
-	return "unlocked";
-}
 
-/**
- * gets the owner of a single file by fsPath
- * @param path fs path of the file
- */
-export function getFileOwnerByPath(path: string): string{
-	let lockFileUri = vscode.Uri.file(path + ".LCK");
-	vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
-		let ownerName = file.getText().split("||")[0];
-		return ownerName;
-	},()=> {
-		//rejected
-		return "";
-	});
-	//console.log("error - no owner returned for " + getFileName(path));
-	return "";
-}
+// /**
+//  * gets the status of a single file by fsPath
+//  * @param path fs path of the file
+//  */
+// export async function getFileStatusByPath(path: string): Promise<string> {
+// 	let lockFileUri = vscode.Uri.file(path + ".LCK");
+// 	await vscode.workspace.openTextDocument(lockFileUri).then(() =>{
+// 		return Promise.resolve("out");
+// 	},()=> {
+// 		if(isReadOnly(path)){
+// 			return Promise.resolve("locked");
+// 		} else {
+// 			return Promise.resolve("unlocked");
+// 		}
+// 	});
+// 	console.error("no status returned for " + getFileName(path));
+// }
+
+// /**
+//  * gets the owner of a single file by fsPath
+//  * @param path fs path of the file
+//  */
+// export async function getFileOwnerByPath(path: string): Promise<string>{
+// 	let lockFileUri = vscode.Uri.file(path + ".LCK");
+// 	await vscode.workspace.openTextDocument(lockFileUri).then((file) =>{
+// 		let ownerName = file.getText().split("||")[0];
+// 		return Promise.resolve(ownerName);
+// 	},()=> {
+// 		//rejected
+// 		return Promise.resolve("");
+// 	});
+// 	console.error("no owner returned for " + getFileName(path));
+// }
 
 /**
  * get file status from workspace state
