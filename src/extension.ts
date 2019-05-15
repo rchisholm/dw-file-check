@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// This code will only be executed once when your extension is activated
 	console.log("DW file check activated.");
-	vscode.window.showInformationMessage("DW file check activated.");
+	//vscode.window.showInformationMessage("DW file check activated.");
 
 	let deployExtension = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
 	if(!deployExtension) {

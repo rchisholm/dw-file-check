@@ -3,5 +3,9 @@
         "**/*.LCK": true,
         "**/dwsync.xml": true,
         "**/_notes": true
+    },
+    "dw-file-check": {
+        "username": "russunit",
+        "email": "russunit@gmail.com"
     }
 }

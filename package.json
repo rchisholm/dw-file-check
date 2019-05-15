@@ -106,17 +106,58 @@
 			"type": "object",
 			"title": "DW User Configuration",
 			"properties": {
-				"dw.username": {
-					"type": "string",
-					"default": "",
-					"description": "Specifies the username for .LCK files",
-					"scope": "window"
-				},
-				"dw.email": {
-					"type": "string",
-					"default": "",
-					"description": "Specifies the user email for .LCK files",
-					"scope": "window"
+				"dw-file-check": {
+					"type": "object",
+					"description": "dw-file-check user and server configuration",
+					"scope": "window",
+					"properties": {
+						"username": {
+							"type": "string",
+							"default": "",
+							"description": "Specifies the username for .LCK files"
+						},
+						"email": {
+							"type": "string",
+							"default": "",
+							"description": "Specifies the user email for .LCK files"
+						},
+						"server": {
+							"type":"object",
+							"description": "remote server for put/get operations",
+							"properties": {
+								"type": {
+									"type": "string",
+									"default": "",
+									"description": "connection protocol - ftp or sftp"
+								},
+								"host": {
+									"type": "string",
+									"default": "",
+									"description": "the address of the host"
+								},
+								"port": {
+									"type": "number",
+									"default": 22,
+									"description": "the port number to use"
+								},
+								"user": {
+									"type": "string",
+									"default": "",
+									"description": "the username for the server"
+								},
+								"password": {
+									"type": "string",
+									"default": "",
+									"description": "the password for the server"
+								},
+								"dir": {
+									"type": "string",
+									"default": "",
+									"description": "the remote directory on the server"
+								}
+							}
+						}
+					}
 				}
 			}
 		}
