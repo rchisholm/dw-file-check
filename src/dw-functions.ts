@@ -343,5 +343,5 @@ export function testPutFile(path: string) {
 }
 
 export function testGetFile(path: string) {
-	ftp.getFileWithFtp(path);
+	ftp.getFileWithSftp(path);
 }

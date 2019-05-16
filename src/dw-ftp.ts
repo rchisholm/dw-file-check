@@ -158,7 +158,7 @@ export function getFileWithFtp(filePath: string) {
         client.get(remotePath, false, function(err, stream) {
             if (err) { 
                 vscode.window.showErrorMessage("FTP Error: " + err.message);
-                console.log(err, 'FTP put error');
+                console.log(err, 'FTP get error');
                 throw err; 
             } else {
                 //write the file with stream to filePath
@@ -172,6 +172,20 @@ export function getFileWithFtp(filePath: string) {
     
 }
 
+/**
+ * gets a file with SFTP
+ * @param filePath path of file to get
+ */
 export function getFileWithSftp(filePath: string) {
-    // TODO: write this
+    let remotePath = getRemoteFilePath(filePath);
+    let client = new sftp();
+    client.connect(getServerConfig())
+    .then(() => {
+        client.get(remotePath, filePath);
+    })
+    .catch((err) => {
+        vscode.window.showErrorMessage("SFTP Error: " + err.message);
+        console.log(err, 'SFTP get error');
+        throw err;
+    });
 }
