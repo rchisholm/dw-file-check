@@ -56,8 +56,12 @@
 				"title": "Open File..."
 			},
 			{
-				"command": "extension.dwTestPutfile",
+				"command": "extension.dwTestPutFile",
 				"title": "PUT Function Test"
+			},
+			{
+				"command": "extension.dwTestGetFile",
+				"title": "GET Function Test"
 			}
 		],
 		"menus": {
@@ -87,7 +91,12 @@
 					"group": "dw-file-check"
 				},
 				{
-					"command": "extension.dwTestPutfile",
+					"command": "extension.dwTestPutFile",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check"
+				},
+				{
+					"command": "extension.dwTestGetFile",
 					"when": "view == file-status-explorer",
 					"group": "dw-file-check"
 				}

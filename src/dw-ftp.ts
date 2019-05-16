@@ -88,6 +88,28 @@ export function putFile(filePath: string) {
 }
 
 /**
+ * gets file with FTP or SFTP, depending on type in settings.json
+ * @param filePath path of file to get
+ */
+export function getFile(filePath: string) {
+    let settings = vscode.workspace.getConfiguration().get('dw-file-check') as any;
+    if(settings['server']) {
+        if(settings['server']['type']){
+            if(settings['server']['type'].toLowerCase() === 'ftp') {
+                getFileWithFtp(filePath);
+            }
+            if(settings['server']['type'].toLowerCase() === 'sftp') {
+                getFileWithSftp(filePath);
+            }
+        } else {
+            console.error("no type designated in server settings");
+        }
+    } else {
+        console.error("no server settings");
+    }
+}
+
+/**
  * puts a file with FTP
  * @param filePath path of the file to put
  */
@@ -125,6 +147,10 @@ function putFileWithSftp(filePath: string) {
     });
 }
 
+/**
+ * gets a file with FTP
+ * @param filePath path of file to get
+ */
 export function getFileWithFtp(filePath: string) {
     let remotePath = getRemoteFilePath(filePath);
     let client = new ftp();
@@ -136,9 +162,8 @@ export function getFileWithFtp(filePath: string) {
                 throw err; 
             } else {
                 //write the file with stream to filePath
-                let wstream = fs.createWriteStream(filePath);
-                wstream.write(stream);
-                wstream.end();
+                stream.once('close', function() { client.end(); });
+                stream.pipe(fs.createWriteStream(filePath));
             }
             client.end();
         });
@@ -148,5 +173,5 @@ export function getFileWithFtp(filePath: string) {
 }
 
 export function getFileWithSftp(filePath: string) {
-    
+    // TODO: write this
 }

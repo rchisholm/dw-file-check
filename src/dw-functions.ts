@@ -341,3 +341,7 @@ export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: 
 export function testPutFile(path: string) {
 	ftp.putFile(path);
 }
+
+export function testGetFile(path: string) {
+	ftp.getFileWithFtp(path);
+}

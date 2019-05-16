@@ -78,9 +78,14 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(node.filePath));
 		});
 	
-		let dwTestPutfile = vscode.commands.registerCommand('extension.dwTestPutfile', (node: DwFile) => {
+		let dwTestPutFile = vscode.commands.registerCommand('extension.dwTestPutFile', (node: DwFile) => {
 			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
 			dw.testPutFile(node.filePath);
+		});
+	
+		let dwTestGetFile = vscode.commands.registerCommand('extension.dwTestGetFile', (node: DwFile) => {
+			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
+			dw.testGetFile(node.filePath);
 		});
 	
 		// add the commands
@@ -95,7 +100,8 @@ export function activate(context: vscode.ExtensionContext) {
 			dwTreeCheckFileStatus,
 			dwTreeOpenFileOptions,
 			dwTreeOpenFile,
-			dwTestPutfile
+			dwTestPutFile,
+			dwTestGetFile
 		);
 	
 		// add the buttons
