@@ -78,6 +78,16 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(node.filePath));
 		});
 	
+		let dwTestFtp = vscode.commands.registerCommand('extension.dwTestFtp', (node: DwFile) => {
+			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
+			dw.testFtp(node.filePath);
+		});
+	
+		let dwTestSftp = vscode.commands.registerCommand('extension.dwTestSftp', (node: DwFile) => {
+			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
+			dw.testSftp(node.filePath);
+		});
+	
 		// add the commands
 		context.subscriptions.push(
 			dwCheckInCurrentFile, 
@@ -89,7 +99,9 @@ export function activate(context: vscode.ExtensionContext) {
 			dwRefreshTree,
 			dwTreeCheckFileStatus,
 			dwTreeOpenFileOptions,
-			dwTreeOpenFile
+			dwTreeOpenFile,
+			dwTestFtp,
+			dwTestSftp
 		);
 	
 		// add the buttons

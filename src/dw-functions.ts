@@ -2,9 +2,9 @@
  * contains the functions used in the commands for dw-file-check
  */
 import * as vscode from 'vscode';
-import * as username from 'username';
 import * as status from './dw-status';
 import * as utils from './dw-utils';
+import * as ftp from './dw-ftp';
 
 /**
  * called on activation.
@@ -12,26 +12,26 @@ import * as utils from './dw-utils';
  */
 export function onStart(context: vscode.ExtensionContext) {
 
-	console.error("test 1");
+	//console.error("test 1");
 
 	// if there is no deploy config, create one
 	if(!utils.deployConfigExists()) {
 		utils.createDeployConfig();
 	}
 
-	console.error("test 2");
+	//console.error("test 2");
 
 	if(!utils.userConfigExists()) {
 		utils.createUserConfig();
 	}
 
-	console.error("test 3");
+	//console.error("test 3");
 
 	if(!utils.emailConfigExists()) {
 		utils.createEmailConfig();
 	}
 
-	console.error("test 4");
+	//console.error("test 4");
 
 	
 	// set username/email in workspaceState
@@ -336,4 +336,12 @@ export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: 
 			vscode.window.showErrorMessage("DW File Operations not supported for non-text files.");
 		});
 	}
+}
+
+export function testFtp(path: string) {
+	ftp.pushFileWithFtp(path);
+}
+
+export function testSftp(path: string) {
+	ftp.pushFileWithSftp(path);
 }

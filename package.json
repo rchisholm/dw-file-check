@@ -54,6 +54,14 @@
 			{
 				"command": "extension.dwTreeOpenFile",
 				"title": "Open File..."
+			},
+			{
+				"command": "extension.dwTestFtp",
+				"title": "FTP Function Test"
+			},
+			{
+				"command": "extension.dwTestSftp",
+				"title": "SFTP Function Test"
 			}
 		],
 		"menus": {
@@ -81,16 +89,26 @@
 					"command": "extension.dwTreeOpenFileOptions",
 					"when": "view == file-status-explorer",
 					"group": "dw-file-check"
+				},
+				{
+					"command": "extension.dwTestFtp",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check"
+				},
+				{
+					"command": "extension.dwTestSftp",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check"
 				}
 			]
 		},
 		"viewsContainers": {
 			"activitybar": [
-			  {
-				"id": "dw-file-status",
-				"title": "File Status Explorer",
-				"icon": "media/dw.png"
-			  }
+				{
+					"id": "dw-file-status",
+					"title": "File Status Explorer",
+					"icon": "media/dw.png"
+				}
 			]
 		},
 		"views": {
@@ -100,7 +118,6 @@
 					"name": "File Status"
 				}
 			]
-
 		},
 		"configuration": {
 			"type": "object",
@@ -122,7 +139,7 @@
 							"description": "Specifies the user email for .LCK files"
 						},
 						"server": {
-							"type":"object",
+							"type": "object",
 							"description": "remote server for put/get operations",
 							"properties": {
 								"type": {
@@ -170,8 +187,10 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
+		"@types/ftp": "^0.3.29",
 		"@types/mocha": "^2.2.42",
 		"@types/node": "^10.12.21",
+		"@types/ssh2-sftp-client": "^2.5.0",
 		"@types/username": "^3.0.0",
 		"tslint": "^5.12.1",
 		"typescript": "^3.3.1",
@@ -180,6 +199,8 @@
 	"dependencies": {
 		"event-stream": "^4.0.1",
 		"fs": "0.0.1-security",
+		"ftp": "^0.3.10",
+		"ssh2-sftp-client": "^2.5.0",
 		"strip-json-comments": "^3.0.1",
 		"username": "^4.1.0"
 	}

@@ -167,64 +167,64 @@ export function createDeployConfig() {
 				.then(choice => {
 					if(choice === "Yes"){
 						vscode.window.showQuickPick(['FTP', 'SFTP'], { placeHolder: "Select Transfer Protocol", ignoreFocusOut: true })
-						.then(protocol => {
-							targetType = protocol ? protocol.toLowerCase() : "protocol"; 
-							vscode.window.showInputBox({ prompt: 'Host (IP / URL):', ignoreFocusOut: true  })
-							.then(host => {
-								targetHost = host ? host : "host";
-								vscode.window.showInputBox({ prompt: 'Port:', placeHolder: '22', ignoreFocusOut: true  })
-								.then(port => {
-									targetPort = port ? +port : 22;
-									vscode.window.showInputBox({ prompt: 'User:', ignoreFocusOut: true  })
-									.then(user => {
-										targetUser = user ? user : "user";
-										vscode.window.showInputBox({ prompt: 'Password:', password: true, ignoreFocusOut: true  })
-										.then(pass => {
-											targetPassword = pass ? pass : "password";
-											vscode.window.showInputBox({ prompt: 'Dir:', placeHolder: '/home/user/public_html/dir', ignoreFocusOut: true  })
-											.then(dir => {
-												targetDir = dir ? dir : "directory";
-												deployReloadedData = {
-													"packages": [
-														{
-															"name": "All",
-															"description": "All files in workspace",
-															"exclude": [
-																"*.code-workspace",
-																"**/_notes",
-																"*.LCK",
-																"**/.vscode/**",
-																"**/.git/**",
-																".gitignore",
-																"**/.DS_Store"
-															]
-														}
-													],
-													"targets": [
-														{
-															"type": targetType, 
-															"name": targetName,
-															"description": targetDescription,
-															"host": targetHost, 
-															"port": targetPort,
-															"user": targetUser, 
-															"password": targetPassword,
-															"dir": targetDir
-														}
-													]
-												};
-												// We now have the deploy reloaded data to insert. 
-												// Append it to the current settings.json data, and write it to file.
-												settingsData['deploy.reloaded'] = deployReloadedData;
-												fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
-												vscode.window.showInformationMessage("Server data set.");
-											});
-										});
-									});
-								});
-							});
-						});
-					}
+				.then(protocol => {
+					targetType = protocol ? protocol.toLowerCase() : "protocol"; 
+					vscode.window.showInputBox({ prompt: 'Host (IP / URL):', ignoreFocusOut: true  })
+				.then(host => {
+					targetHost = host ? host : "host";
+					vscode.window.showInputBox({ prompt: 'Port:', placeHolder: '22', ignoreFocusOut: true  })
+				.then(port => {
+					targetPort = port ? +port : 22;
+					vscode.window.showInputBox({ prompt: 'User:', ignoreFocusOut: true  })
+				.then(user => {
+					targetUser = user ? user : "user";
+					vscode.window.showInputBox({ prompt: 'Password:', password: true, ignoreFocusOut: true  })
+				.then(pass => {
+					targetPassword = pass ? pass : "password";
+					vscode.window.showInputBox({ prompt: 'Dir:', placeHolder: '/home/user/public_html/dir', ignoreFocusOut: true  })
+				.then(dir => {
+					targetDir = dir ? dir : "directory";
+					deployReloadedData = {
+						"packages": [
+							{
+								"name": "All",
+								"description": "All files in workspace",
+								"exclude": [
+									"*.code-workspace",
+									"**/_notes",
+									"*.LCK",
+									"**/.vscode/**",
+									"**/.git/**",
+									".gitignore",
+									"**/.DS_Store"
+								]
+							}
+						],
+						"targets": [
+							{
+								"type": targetType, 
+								"name": targetName,
+								"description": targetDescription,
+								"host": targetHost, 
+								"port": targetPort,
+								"user": targetUser, 
+								"password": targetPassword,
+								"dir": targetDir
+							}
+						]
+					};
+					// We now have the deploy reloaded data to insert. 
+					// Append it to the current settings.json data, and write it to file.
+					settingsData['deploy.reloaded'] = deployReloadedData;
+					fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
+					vscode.window.showInformationMessage("Server data set.");
+				});
+				});
+				});
+				});
+				});
+				});
+				}
 				});
 			} 
 		});
@@ -280,16 +280,16 @@ export function createUserConfig() {
 				.then(choice => {
 					if(choice === "Yes"){
 						vscode.window.showInputBox({ prompt: 'user name', ignoreFocusOut: true  })
-						.then(uName => {
-							userName = uName ? uName.toLowerCase() : '';
-							// add the username to the settings.config
-							settingsData['dw-file-check']['username'] = userName;
-							// write to settings.json
-							fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
-						});
+				.then(uName => {
+					userName = uName ? uName.toLowerCase() : '';
+					// add the username to the settings.config
+					settingsData['dw-file-check']['username'] = userName;
+					// write to settings.json
+					fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
+				});
 
 						
-					}
+				}
 				});
 			} 
 		});
@@ -344,16 +344,16 @@ export function createEmailConfig() {
 				.then(choice => {
 					if(choice === "Yes"){
 						vscode.window.showInputBox({ prompt: 'email', ignoreFocusOut: true  })
-						.then(email => {
-							userEmail = email ? email.toLowerCase() : '';
-							// add the username to the settings.config
-							settingsData['dw-file-check']['email'] = userEmail;
-							// write to settings.json
-							fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
-						});
+				.then(email => {
+					userEmail = email ? email.toLowerCase() : '';
+					// add the username to the settings.config
+					settingsData['dw-file-check']['email'] = userEmail;
+					// write to settings.json
+					fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
+				});
 
 						
-					}
+				}
 				});
 			} 
 		});
@@ -374,6 +374,14 @@ export function getSlash(): string {
  */
 export function cPath(input: string) : string {
 	return input.replace("/", getSlash());
+}
+
+/**
+ * cleans a path for unix server
+ * @param input the path to clean
+ */
+export function serverPath(input: string) : string {
+	return input.replace("\\", "/");
 }
 
 /**
