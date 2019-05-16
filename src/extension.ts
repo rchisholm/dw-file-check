@@ -78,14 +78,9 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(node.filePath));
 		});
 	
-		let dwTestFtp = vscode.commands.registerCommand('extension.dwTestFtp', (node: DwFile) => {
+		let dwTestPutfile = vscode.commands.registerCommand('extension.dwTestPutfile', (node: DwFile) => {
 			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
-			dw.testFtp(node.filePath);
-		});
-	
-		let dwTestSftp = vscode.commands.registerCommand('extension.dwTestSftp', (node: DwFile) => {
-			//dw.openFileOptions(context, vscode.Uri.file(node.filePath));
-			dw.testSftp(node.filePath);
+			dw.testPutFile(node.filePath);
 		});
 	
 		// add the commands
@@ -100,8 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
 			dwTreeCheckFileStatus,
 			dwTreeOpenFileOptions,
 			dwTreeOpenFile,
-			dwTestFtp,
-			dwTestSftp
+			dwTestPutfile
 		);
 	
 		// add the buttons

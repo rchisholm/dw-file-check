@@ -56,12 +56,8 @@
 				"title": "Open File..."
 			},
 			{
-				"command": "extension.dwTestFtp",
-				"title": "FTP Function Test"
-			},
-			{
-				"command": "extension.dwTestSftp",
-				"title": "SFTP Function Test"
+				"command": "extension.dwTestPutfile",
+				"title": "PUT Function Test"
 			}
 		],
 		"menus": {
@@ -91,12 +87,7 @@
 					"group": "dw-file-check"
 				},
 				{
-					"command": "extension.dwTestFtp",
-					"when": "view == file-status-explorer",
-					"group": "dw-file-check"
-				},
-				{
-					"command": "extension.dwTestSftp",
+					"command": "extension.dwTestPutfile",
 					"when": "view == file-status-explorer",
 					"group": "dw-file-check"
 				}

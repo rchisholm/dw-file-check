@@ -338,10 +338,6 @@ export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: 
 	}
 }
 
-export function testFtp(path: string) {
-	ftp.pushFileWithFtp(path);
-}
-
-export function testSftp(path: string) {
-	ftp.pushFileWithSftp(path);
+export function testPutFile(path: string) {
+	ftp.putFile(path);
 }
