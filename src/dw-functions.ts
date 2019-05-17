@@ -338,10 +338,18 @@ export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: 
 	}
 }
 
+/**
+ * for testing SFTP/FTP put
+ * @param path path of file
+ */
 export function testPutFile(path: string) {
 	ftp.putFile(path);
 }
 
+/**
+ * for testing SFTP/FTP get
+ * @param path path of file
+ */
 export function testGetFile(path: string) {
-	ftp.getFileWithSftp(path);
+	ftp.getFile(path);
 }
