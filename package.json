@@ -1,7 +1,7 @@
 {
 	"name": "dw-file-check",
 	"displayName": "DW File Check",
-	"description": "DW-style file check-in/lock for deploy extension",
+	"description": "DW-style file check-in/lock",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.33.0"
@@ -33,18 +33,10 @@
 			},
 			{
 				"command": "extension.dwCheckFileStatus",
-				"title": "Checkout Status..."
+				"title": "View DW File Status"
 			},
 			{
 				"command": "extension.dwOpenFileOptions",
-				"title": "DW File Operations..."
-			},
-			{
-				"command": "extension.dwTreeCheckFileStatus",
-				"title": "Checkout Status..."
-			},
-			{
-				"command": "extension.dwTreeOpenFileOptions",
 				"title": "DW File Operations..."
 			},
 			{
@@ -53,52 +45,78 @@
 			},
 			{
 				"command": "extension.dwTreeOpenFile",
-				"title": "Open File..."
+				"title": "Open File"
 			},
 			{
-				"command": "extension.dwTestPutFile",
-				"title": "PUT Function Test"
+				"command": "extension.dwTreeGetFile",
+				"title": "Get File"
 			},
 			{
-				"command": "extension.dwTestGetFile",
-				"title": "GET Function Test"
+				"command": "extension.dwTreePutFile",
+				"title": "Put File"
+			},
+			{
+				"command": "extension.dwTreeCheckOutFile",
+				"title": "Check File Out"
+			},
+			{
+				"command": "extension.dwTreeCheckInFile",
+				"title": "Check File In"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
 					"command": "extension.dwCheckFileStatus",
-					"group": "dw-file-check"
+					"group": "dw-file-check@1"
 				},
 				{
-					"command": "extension.dwOpenFileOptions",
-					"group": "dw-file-check"
+					"command": "extension.dwTreeGetFile",
+					"group": "dw-file-check@2"
+				},
+				{
+					"command": "extension.dwTreePutFile",
+					"group": "dw-file-check@3"
+				},
+				{
+					"command": "extension.dwTreeCheckOutFile",
+					"group": "dw-file-check@4"
+				},
+				{
+					"command": "extension.dwTreeCheckInFile",
+					"group": "dw-file-check@5"
 				}
 			],
 			"view/item/context": [
 				{
 					"command": "extension.dwTreeOpenFile",
-					"when": "view == file-status-explorer"
+					"when": "view == file-status-explorer",
+					"group": "a@1"
 				},
 				{
-					"command": "extension.dwTreeCheckFileStatus",
+					"command": "extension.dwCheckFileStatus",
 					"when": "view == file-status-explorer",
-					"group": "dw-file-check"
+					"group": "a@2"
 				},
 				{
-					"command": "extension.dwTreeOpenFileOptions",
+					"command": "extension.dwTreeGetFile",
 					"when": "view == file-status-explorer",
-					"group": "dw-file-check"
+					"group": "dw-file-check@2"
 				},
 				{
-					"command": "extension.dwTestPutFile",
+					"command": "extension.dwTreePutFile",
 					"when": "view == file-status-explorer",
-					"group": "dw-file-check"
+					"group": "dw-file-check@3"
 				},
 				{
-					"command": "extension.dwTestGetFile",
+					"command": "extension.dwTreeCheckOutFile",
 					"when": "view == file-status-explorer",
-					"group": "dw-file-check"
+					"group": "dw-file-check@4"
+				},
+				{
+					"command": "extension.dwTreeCheckInFile",
+					"when": "view == file-status-explorer",
+					"group": "dw-file-check@5"
 				}
 			]
 		},

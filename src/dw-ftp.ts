@@ -151,7 +151,7 @@ function putFileWithSftp(filePath: string) {
  * gets a file with FTP
  * @param filePath path of file to get
  */
-export function getFileWithFtp(filePath: string) {
+function getFileWithFtp(filePath: string) {
     let remotePath = getRemoteFilePath(filePath);
     let client = new ftp();
     client.on('ready', function() {
@@ -176,7 +176,7 @@ export function getFileWithFtp(filePath: string) {
  * gets a file with SFTP
  * @param filePath path of file to get
  */
-export function getFileWithSftp(filePath: string) {
+function getFileWithSftp(filePath: string) {
     let remotePath = getRemoteFilePath(filePath);
     let client = new sftp();
     client.connect(getServerConfig())

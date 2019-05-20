@@ -1,5 +1,5 @@
 /**
- * contains the functions used in the commands for dw-file-check
+ * contains the core functionality for dw-file-check
  */
 import * as vscode from 'vscode';
 import * as status from './dw-status';
@@ -47,94 +47,58 @@ export function onStart(context: vscode.ExtensionContext) {
 }
 
 /**
- * pull currently open file from server
+ * get file from server
+ * @param path path of the file
  */
-export function pullCurrentFile(){
-	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
-	// is the ext loaded and ready?
-	if(deploy){
-		if( deploy.isActive === false ){
-			deploy.activate().then(
-				function(){
-					console.log( "Deploy activated");
-					// comment next line out for release
-					// findCommand(); 
-					vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
-				},
-				function(){
-					console.log( "Deploy activation failed");
-				}
-			);   
-		} else {
-			vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
+export function getFile(path: string) {
+	ftp.getFile(path);
+}
+
+/**
+ * 
+ * @param context 
+ * @param path 
+ */
+export function startPutFile(context: vscode.ExtensionContext, path: string) {
+	// if locked OR checked out by someone else: disallow; warn user they should check the file out.
+	// else: allow
+	let fileName = utils.getFileName(path);
+	//vscode.window.showInformationMessage(currentFilePath);
+	let fileStatus = status.getFileStatus(context, path);
+
+	if(fileStatus === "out") {
+		let fileOwner = status.getFileOwner(context, path);
+		if(fileOwner === utils.getUserName(context)){
+			// file is checked out by you.
+			finishPutFile(path);
+		}else{
+			// file is checked out by someone else
+			vscode.window.showErrorMessage(fileName + " is checked out by " + fileOwner + ". Please check file out to push.");
 		}
+	}else if(fileStatus === "locked"){
+		// file is locked
+		vscode.window.showErrorMessage(fileName + " is locked. Please check file out to push.");
+	}else{
+		// file is unlocked
+		finishPutFile(path);
 	}
 }
 
 /**
- * try to push currently open file
- * @param context vscode extension context
+ * push file to server
+ * @param path path of the file
  */
-export function startPushCurrentFile(context: vscode.ExtensionContext) {
-        // if locked OR checked out by someone else: disallow; warn user they should check the file out.
-        // else: allow
-        if(vscode.window.activeTextEditor){
-            let currentFilePath = vscode.window.activeTextEditor.document.uri.fsPath;
-            let fileName = utils.getFileName(currentFilePath);
-            //vscode.window.showInformationMessage(currentFilePath);
-            let currentFileStatus = status.getFileStatus(context, currentFilePath);
+function finishPutFile(path: string) {
+	ftp.putFile(path);
+}
 
-            if(currentFileStatus === "out") {
-                let currentFileOwner = status.getFileOwner(context, currentFilePath);
-				if(currentFileOwner === utils.getUserName(context)){
-					// file is checked out by you.
-					pushCurrentFile();
-				}else{
-					// file is checked out by someone else
-					vscode.window.showErrorMessage(fileName + " is checked out by " + currentFileOwner + ". Please check file out to push.");
-				}
-            }else if(currentFileStatus === "locked"){
-                // file is locked
-                vscode.window.showErrorMessage(fileName + " is locked. Please check file out to push.");
-            }else{
-                // file is unlocked
-                pushCurrentFile();
-            }
-        } else {
-            vscode.window.showErrorMessage("No open file.");
-        }
-}
-/**
- * push currently open file to server
- */
-export function pushCurrentFile(){
-	let deploy = vscode.extensions.getExtension('mkloubert.vscode-deploy-reloaded');
-	// is the ext loaded and ready?
-	if(deploy){
-		if( deploy.isActive === false ){
-			deploy.activate().then(
-				function(){
-					console.log( "Deploy activated");
-					// comment next line out for release
-					// findCommand(); 
-					vscode.commands.executeCommand("extension.deploy.reloaded.pullFile");
-				},
-				function(){
-					console.log( "Deploy activation failed");
-				}
-			);   
-		} else {
-			vscode.commands.executeCommand("extension.deploy.reloaded.deployFile");
-		}
-	}
-}
 
 /**
  * try to check in file
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function checkInFile(context: vscode.ExtensionContext, path: string){
+export function startCheckInFile(context: vscode.ExtensionContext, path: string){
 	let currentFileStatus = status.getFileStatus(context, path);
 	let fileName = utils.getFileName(path);
 	
@@ -143,13 +107,13 @@ export function checkInFile(context: vscode.ExtensionContext, path: string){
 		if(currentFileOwner === utils.getUserName(context)){
 			// file is checked out by you.
 			// vscode.window.showInformationMessage("File is checked out by you!");
-			finishCheckIn(context, path);
+			finishCheckInFile(context, path);
 		}else{
 			// file is checked out by someone else
 			vscode.window.showWarningMessage(fileName + " is checked out by " + currentFileOwner + ". Override his/her checkout?", ...["Confirm", "Cancel"])
 				.then(choice => {
 					if(choice === "Confirm"){
-						finishCheckIn(context, path);
+						finishCheckInFile(context, path);
 					}
 				}
 			);
@@ -161,16 +125,17 @@ export function checkInFile(context: vscode.ExtensionContext, path: string){
 	}else{
 		//file is unlocked
 		//vscode.window.showInformationMessage("File is unlocked.");
-		finishCheckIn(context, path);
+		finishCheckInFile(context, path);
 	}
 }
+
 
 /**
  * successfully check in file
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function finishCheckIn(context: vscode.ExtensionContext, path: string){
+function finishCheckInFile(context: vscode.ExtensionContext, path: string){
 
 	let fileName = utils.getFileName(path);
 
@@ -184,7 +149,7 @@ export function finishCheckIn(context: vscode.ExtensionContext, path: string){
 	status.setFileOwner(context, path, "");
 
 	//push to remote
-	pushCurrentFile();
+	finishPutFile(path);
 
 	//set readonly on local
 	utils.setReadOnly(path);
@@ -198,7 +163,7 @@ export function finishCheckIn(context: vscode.ExtensionContext, path: string){
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function checkOutFile(context: vscode.ExtensionContext, path: string) {
+export function startCheckOutFile(context: vscode.ExtensionContext, path: string) {
 	let currentFileStatus = status.getFileStatus(context, path);
 	let fileName = utils.getFileName(path);
 
@@ -215,14 +180,14 @@ export function checkOutFile(context: vscode.ExtensionContext, path: string) {
 						//delete their .LCK file
 						utils.deleteLockFile(path);
 						//finish checkout
-						finishCheckOut(context, path);
+						finishCheckOutFile(context, path);
 					}
 				}
 			);
 		}
 	}else{
 		//file is locked or unlocked
-		finishCheckOut(context, path);
+		finishCheckOutFile(context, path);
 	}
 }
 
@@ -231,7 +196,7 @@ export function checkOutFile(context: vscode.ExtensionContext, path: string) {
  * @param context vscode extension context
  * @param path fs path of the file
  */
-export function finishCheckOut(context: vscode.ExtensionContext, path: string){
+function finishCheckOutFile(context: vscode.ExtensionContext, path: string){
 
 	let fileName = utils.getFileName(path);
 
@@ -244,11 +209,11 @@ export function finishCheckOut(context: vscode.ExtensionContext, path: string){
 	status.setFileStatus(context, path, "out");
 	status.setFileOwner(context, path, utils.getUserName(context));
 
-	vscode.window.showWarningMessage("Pull " + fileName + " from remote server?", 
+	vscode.window.showWarningMessage("Get " + fileName + " from remote server?", 
 		...["Yes", "No"]).then(choice => {
 			if(choice === "Yes"){
 				//pull current file
-				pullCurrentFile();
+				getFile(path);
 			}
 		}
 	);
@@ -260,83 +225,55 @@ export function finishCheckOut(context: vscode.ExtensionContext, path: string){
 	vscode.commands.executeCommand("extension.dwRefreshTree");
 }
 
-/**
- * displays the file status and owner of the right-clicked file
- * @param context vscode extension context
- * @param fileOrFolder uri of the right-clicked file
- */
-export function checkFileStatus(context: vscode.ExtensionContext, fileOrFolder: vscode.Uri){
-	//vscode.window.showInformationMessage('File: ' + fileOrFolder.fsPath);
-	if (utils.isFolder(fileOrFolder.fsPath)) {
-		vscode.window.showWarningMessage("Directories have no status. Please select an individual file.");
-	} else {
-		let fileName = utils.getFileName(fileOrFolder.fsPath);
-		let selectedFileStatus = status.getFileStatus(context, fileOrFolder.fsPath);
-		switch(selectedFileStatus) {
-			case 'out':
-				vscode.window.showInformationMessage(fileName + " is checked out by " + status.getFileOwner(context, fileOrFolder.fsPath));
-			break;
-			case 'locked':
-				vscode.window.showInformationMessage(fileName + " is checked in. (locked)");
-			break;
-			case 'unlocked':
-				vscode.window.showInformationMessage(fileName + " is not checked in. (unlocked)");
-			break;
-			default:
-				vscode.window.showWarningMessage('No status found for ' + fileName + '. Updating...');
-				status.updateFileStatusByPath(context, fileOrFolder.fsPath);
-			break;
-		}
-		vscode.commands.executeCommand("extension.dwRefreshTree");
-	}
-}
 
-/**
- * displays a list of commands available for the right-clicked file
- * @param context vscode extension context
- * @param fileOrFolder uri of the right-clicked file
- */
-export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: vscode.Uri){
-	//vscode.window.showInformationMessage('File: ' + fileOrFolder.fsPath);
-	if (utils.isFolder(fileOrFolder.fsPath)) {
-		vscode.window.showWarningMessage("Directories have no status. Please select an individual file.");
-	} else {
-		//open the clicked file, then show quickpick list
-		vscode.workspace.openTextDocument(fileOrFolder)
-		.then((doc:vscode.TextDocument) => {
-			vscode.window.showTextDocument(doc)
-			.then(() => {
-				const QUICK_PICKS = [
-					'$(arrow-down) Pull File',
-					'$(arrow-up) Push File',
-					'$(check) Check Out',
-					'$(lock) Check In'
-				];
+// export function treeCheckOutFile(context: )
 
-				//vscode.window.showQuickPick(QUICK_PICKS);
-				vscode.window.showQuickPick(QUICK_PICKS).then((choice) => {
-					switch(choice){
-						case '$(arrow-down) Pull File':
-						vscode.commands.executeCommand('extension.dwPullCurrentFile');
-						break;
-						case '$(arrow-up) Push File':
-						vscode.commands.executeCommand('extension.dwPushCurrentFile');
-						break;
-						case '$(check) Check Out':
-						vscode.commands.executeCommand('extension.dwCheckOutCurrentFile');
-						break;
-						case '$(lock) Check In':
-						vscode.commands.executeCommand('extension.dwCheckInCurrentFile');
-						break;
-					}
-				});
-			});
-		},
-		() => {
-			vscode.window.showErrorMessage("DW File Operations not supported for non-text files.");
-		});
-	}
-}
+// /**
+//  * displays a list of commands available for the right-clicked file
+//  * @param context vscode extension context
+//  * @param fileOrFolder uri of the right-clicked file
+//  */
+// export function openFileOptions(context: vscode.ExtensionContext, fileOrFolder: vscode.Uri){
+// 	//vscode.window.showInformationMessage('File: ' + fileOrFolder.fsPath);
+// 	if (utils.isFolder(fileOrFolder.fsPath)) {
+// 		vscode.window.showWarningMessage("Directories have no status. Please select an individual file.");
+// 	} else {
+// 		//open the clicked file, then show quickpick list
+// 		vscode.workspace.openTextDocument(fileOrFolder)
+// 		.then((doc:vscode.TextDocument) => {
+// 			vscode.window.showTextDocument(doc)
+// 			.then(() => {
+// 				const QUICK_PICKS = [
+// 					'$(arrow-down) Pull File',
+// 					'$(arrow-up) Push File',
+// 					'$(check) Check Out',
+// 					'$(lock) Check In'
+// 				];
+
+// 				//vscode.window.showQuickPick(QUICK_PICKS);
+// 				vscode.window.showQuickPick(QUICK_PICKS).then((choice) => {
+// 					switch(choice){
+// 						case '$(arrow-down) Pull File':
+// 						vscode.commands.executeCommand('extension.dwPullCurrentFile');
+// 						break;
+// 						case '$(arrow-up) Push File':
+// 						vscode.commands.executeCommand('extension.dwPushCurrentFile');
+// 						break;
+// 						case '$(check) Check Out':
+// 						vscode.commands.executeCommand('extension.dwCheckOutCurrentFile');
+// 						break;
+// 						case '$(lock) Check In':
+// 						vscode.commands.executeCommand('extension.dwCheckInCurrentFile');
+// 						break;
+// 					}
+// 				});
+// 			});
+// 		},
+// 		() => {
+// 			vscode.window.showErrorMessage("DW File Operations not supported for non-text files.");
+// 		});
+// 	}
+// }
 
 /**
  * for testing SFTP/FTP put

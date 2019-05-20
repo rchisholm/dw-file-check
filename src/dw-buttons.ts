@@ -19,8 +19,8 @@ export function addDwButtons(context: vscode.ExtensionContext){
     checkOutButton.command = 'extension.dwCheckOutCurrentFile';
     checkInButton.command = 'extension.dwCheckInCurrentFile';
 
-    pullButton.text = "Pull File $(arrow-down)";
-    pushButton.text = "Push File $(arrow-up)";
+    pullButton.text = "Get File $(arrow-down)";
+    pushButton.text = "Put File $(arrow-up)";
     checkOutButton.text = "Check Out $(check)";
     checkInButton.text = "Check In $(lock)";
 
