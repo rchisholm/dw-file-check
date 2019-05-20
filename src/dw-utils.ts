@@ -101,27 +101,11 @@ export function getFileName(path: string) {
 /**
  * returns true if a deploy.reloaded config option exists
  */
-export function deployConfigExists(): boolean {
-	// if there is a folder .vscode
-	//  if it contains a file settings.json
-	//   if it contains a "deploy.reloaded" attribute
-	//    return true;
-	
-	//console.log(vscode.workspace.workspaceFolders);
-	if(vscode.workspace.workspaceFolders){
-		vscode.workspace.workspaceFolders.forEach(folder => {
-			//console.error(folder.uri.fsPath);
-			//console.error("folder: " + folder.uri.fsPath);
-			if(fs.existsSync(folder.uri.fsPath + cPath("/.vscode/settings.json"))) {
-				let settingsPath = folder.uri.fsPath + cPath("/.vscode/settings.json");
-				let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
-				//console.log("settings data:");
-				//console.log(settingsData);
-				if(settingsData['deploy.reloaded']){
-					return true;
-				} 
-			}
-		});
+export function serverConfigExists(): boolean {
+	// if dw-file-check.server is set, return true
+	let settings = vscode.workspace.getConfiguration().get('dw-file-check') as any;
+	if(settings['server']) {
+		return true;
 	}
 	return false;
 }
@@ -129,11 +113,9 @@ export function deployConfigExists(): boolean {
 /**
  * prompt user for options to set deploy.reloaded config
  */
-export function createDeployConfig() {
+export function createServerConfig() {
 	//console.log("running createDeploymentConfig()...");
 	let targetType: string;
-	let targetName: string = "server";
-	let targetDescription: string = "live server";
 	let targetHost: string;
 	let targetPort: number;
 	let targetUser: string;
@@ -158,14 +140,23 @@ export function createDeployConfig() {
 			
 			let settingsPath = folder.uri.fsPath + cPath("/.vscode/settings.json");
 			let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
-			if(!settingsData['deploy.reloaded']){
-				//no deploy reloaded data ; add some
-				let deployReloadedData: any;
+			if(!settingsData['dw-file-check']){
+				//no dw-file-check data ; add some
+				console.warn("in createServerConfig(), no dw-file-check data");
+				settingsData['dw-file-check'] = {};
+			}
+			if(!settingsData['dw-file-check']['server']) {
+				let serverData: any;
 
 				//start prompting for info
 				vscode.window.showWarningMessage("No server data is present for " + folder.uri.fsPath + ". Enter server details?", ...["Yes", "No"])
 				.then(choice => {
 					if(choice === "Yes"){
+						//check again for data
+						let dwSettings = vscode.workspace.getConfiguration().get('dw-file-check') as any;
+						if(dwSettings) {
+							settingsData['dw-file-check'] = dwSettings;
+						}
 						vscode.window.showQuickPick(['FTP', 'SFTP'], { placeHolder: "Select Transfer Protocol", ignoreFocusOut: true })
 				.then(protocol => {
 					targetType = protocol ? protocol.toLowerCase() : "protocol"; 
@@ -184,38 +175,17 @@ export function createDeployConfig() {
 					vscode.window.showInputBox({ prompt: 'Dir:', placeHolder: '/home/user/public_html/dir', ignoreFocusOut: true  })
 				.then(dir => {
 					targetDir = dir ? dir : "directory";
-					deployReloadedData = {
-						"packages": [
-							{
-								"name": "All",
-								"description": "All files in workspace",
-								"exclude": [
-									"*.code-workspace",
-									"**/_notes",
-									"*.LCK",
-									"**/.vscode/**",
-									"**/.git/**",
-									".gitignore",
-									"**/.DS_Store"
-								]
-							}
-						],
-						"targets": [
-							{
-								"type": targetType, 
-								"name": targetName,
-								"description": targetDescription,
-								"host": targetHost, 
-								"port": targetPort,
-								"user": targetUser, 
-								"password": targetPassword,
-								"dir": targetDir
-							}
-						]
+					serverData = {
+						"type": targetType, 
+						"host": targetHost, 
+						"port": targetPort,
+						"user": targetUser, 
+						"password": targetPassword,
+						"dir": targetDir
 					};
 					// We now have the deploy reloaded data to insert. 
 					// Append it to the current settings.json data, and write it to file.
-					settingsData['deploy.reloaded'] = deployReloadedData;
+					settingsData['dw-file-check']['server'] = serverData;
 					fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
 					vscode.window.showInformationMessage("Server data set.");
 				});
@@ -271,6 +241,7 @@ export function createUserConfig() {
 			let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
 			if(!settingsData['dw-file-check']){
 				//no dw-file-check data ; add some
+				console.warn("in createUserConfig(), no dw-file-check data");
 				settingsData['dw-file-check'] = {};
 			}
 			if(!settingsData['dw-file-check']['username']) {
@@ -279,6 +250,11 @@ export function createUserConfig() {
 				vscode.window.showWarningMessage("No username is present for " + folder.uri.fsPath + ". Enter username?", ...["Yes", "No"])
 				.then(choice => {
 					if(choice === "Yes"){
+						//check again for data
+						let dwSettings = vscode.workspace.getConfiguration().get('dw-file-check') as any;
+						if(dwSettings) {
+							settingsData['dw-file-check'] = dwSettings;
+						}
 						vscode.window.showInputBox({ prompt: 'user name', ignoreFocusOut: true  })
 				.then(uName => {
 					userName = uName ? uName.toLowerCase() : '';
@@ -286,9 +262,7 @@ export function createUserConfig() {
 					settingsData['dw-file-check']['username'] = userName;
 					// write to settings.json
 					fs.writeFileSync(settingsPath, JSON.stringify(settingsData, null, 4));
-				});
-
-						
+				});	
 				}
 				});
 			} 
@@ -335,6 +309,7 @@ export function createEmailConfig() {
 			let settingsData = JSON.parse(stripJsonComments(fs.readFileSync(settingsPath, "utf8")));
 			if(!settingsData['dw-file-check']){
 				//no dw-file-check data ; add some
+				console.warn("in createEmailConfig(), no dw-file-check data");
 				settingsData['dw-file-check'] = {};
 			}
 			if(!settingsData['dw-file-check']['email']) {
@@ -343,6 +318,11 @@ export function createEmailConfig() {
 				vscode.window.showWarningMessage("No email is present for " + folder.uri.fsPath + ". Enter email?", ...["Yes", "No"])
 				.then(choice => {
 					if(choice === "Yes"){
+						//check again for data
+						let dwSettings = vscode.workspace.getConfiguration().get('dw-file-check') as any;
+						if(dwSettings) {
+							settingsData['dw-file-check'] = dwSettings;
+						}
 						vscode.window.showInputBox({ prompt: 'email', ignoreFocusOut: true  })
 				.then(email => {
 					userEmail = email ? email.toLowerCase() : '';

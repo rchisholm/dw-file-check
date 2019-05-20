@@ -12,26 +12,18 @@ import * as ftp from './dw-ftp';
  */
 export function onStart(context: vscode.ExtensionContext) {
 
-	//console.error("test 1");
-
 	// if there is no deploy config, create one
-	if(!utils.deployConfigExists()) {
-		utils.createDeployConfig();
+	if(!utils.serverConfigExists()) {
+		utils.createServerConfig();
 	}
-
-	//console.error("test 2");
-
-	if(!utils.userConfigExists()) {
-		utils.createUserConfig();
-	}
-
-	//console.error("test 3");
 
 	if(!utils.emailConfigExists()) {
 		utils.createEmailConfig();
 	}
 
-	//console.error("test 4");
+	if(!utils.userConfigExists()) {
+		utils.createUserConfig();
+	}
 
 	
 	// set username/email in workspaceState
